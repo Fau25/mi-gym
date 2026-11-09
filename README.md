@@ -10,4 +10,4 @@ App personal (PWA) para apuntar los entrenos y el peso corporal, y seguir el pro
 
 Publicar: subir `VERSION` en app.js y `CACHE` en sw.js, push a main (Pages desde main / raíz).
 
-Imágenes de ejercicios: [Free Exercise DB](https://github.com/yuhonas/free-exercise-db) (dominio público, Unlicense).
+Ilustraciones de ejercicios: [Everkinetic](https://github.com/everkinetic/data), licencia CC BY-SA 4.0 (recortadas, en gris y convertidas a WebP).

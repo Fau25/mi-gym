@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -300,7 +300,7 @@ function vAjustes() {
   <section class="tarjeta"><h2>Copia de seguridad</h2>
     <div class="botones2"><button class="btn sec" id="exportar">Exportar</button><label class="btn sec">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label></div>
     ${cs.length ? `<p class="nota">Copias automáticas:</p><ul class="lista">${cs.map((c, i) => `<li><span>${corta(c.f)}</span><small><button class="mini txt" data-restaurar="${i}">Restaurar</button></small></li>`).join('')}</ul>` : ''}</section>
-  <p class="nota centro">Mi Gym ${VERSION} · datos solo en este dispositivo</p>`;
+  <p class="nota centro">Mi Gym ${VERSION} · datos solo en este dispositivo<br>Ilustraciones: <a href="https://github.com/everkinetic/data">Everkinetic</a> (CC BY-SA 4.0)</p>`;
 }
 
 // ---------- Eventos ----------
