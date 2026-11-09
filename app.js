@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -136,6 +136,7 @@ function grafica(series, alto = 140) {
 }
 const dia = s => deIso(s).getTime() / 864e5;
 
+const rango = r => r[0] === r[1] ? r[0] : `${r[0]}–${r[1]}`;
 // ---------- Vistas ----------
 let vista = 'hoy', tipoManual = null;
 function ir(v) { vista = v; pintar(); $('#vista').focus({ preventScroll: true }); scrollTo(0, 0); }
@@ -178,7 +179,7 @@ function vHoy() {
       const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
       const nuevo = !hu.fijo && (!prev || !prev[tipo] || prev[tipo][i] !== id);
       return `<li><button class="ejfila${s >= hu.s ? ' hecho' : ''}" data-abrir="${tipo}:${i}">${foto(id)}
-        <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${hu.r[0]}–${hu.r[1]}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}${sug.sube ? ' · <em class="up">sube</em>' : ''}</small>
+        <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${rango(hu.r)}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}${sug.sube ? ' · <em class="up">sube</em>' : ''}</small>
         <span class="puntos">${Array.from({ length: Math.max(hu.s, s) }, (_, k) => `<i class="${k < s ? 'si' : ''}"></i>`).join('')}</span></span>
         <span class="flecha" aria-hidden="true">›</span></button></li>`;
     }).join('')}</ul>`;
@@ -191,7 +192,7 @@ function resumenPlan(sem, t) {
   const p = plan(sem), prev = planAnterior(sem);
   return `<section class="tarjeta"><h2>${PLANTILLA[t].titulo} · ${PLANTILLA[t].sub}</h2><ul class="rejilla">${p[t].map((id, i) => {
     const h = PLANTILLA[t].huecos[i], nuevo = !h.fijo && (!prev || !prev[t] || prev[t][i] !== id);
-    return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${h.r[0]}–${h.r[1]}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
+    return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${rango(h.r)}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
   }).join('')}</ul></section>`;
 }
 
@@ -221,7 +222,7 @@ function contenidoHoja(fecha, tipo, i) {
       ${!h.pool && !h.alt ? '' : `<button class="redondo cambiar" data-cambiar aria-label="Cambiar por otro ejercicio"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></button>`}
       <span class="pos">${i + 1}/${total}</span></div>
     <div class="hoja-cuerpo">
-    <h2 id="hojaT">${esc(e.n)}</h2><p class="meta">${etiqueta}<span>${GRUPOS[e.g]} · ${h.s} × ${h.r[0]}–${h.r[1]}</span></p>
+    <h2 id="hojaT">${esc(e.n)}</h2><p class="meta">${etiqueta}<span>${GRUPOS[e.g]} · ${h.s} × ${rango(h.r)}</span></p>
     <p class="sug${sug.sube ? ' sube' : ''}">${esc(sug.txt)}</p>
     ${ult ? `<p class="ultima">Última (${corta(ult.f)}): ${ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(', ')}</p>` : ''}
     <div class="series">${filas}</div>
@@ -312,7 +313,7 @@ function vAjustes() {
   <form class="tarjeta fila-peso" id="fObj"><label class="campo"><span>Peso objetivo (kg)</span><input id="inObj" inputmode="decimal" value="${D.ajustes.objetivo ?? ''}" placeholder="Opcional"></label><button class="btn">Guardar</button></form>
   <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). Miércoles: pierna y abdomen. Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza (puedes cambiarlos por una alternativa si la máquina está ocupada).</p>
     <button class="btn sec ancho" id="renovar">Renovar ejercicios de esta semana</button></section>
-  <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Cuando haces todas las series en lo alto del rango de repeticiones, te propone subir kilos. Si dos sesiones seguidas no llegas al mínimo, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
+  <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Todos los ejercicios son de 3 series de 8. Cuando completas las 3 series de 8, te propone subir kilos. Si dos sesiones seguidas no llegas a 8, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
     <div class="botones2"><label class="btn sec">Importar imágenes<input type="file" id="importarImg" accept="application/json,.json" hidden></label>${Object.keys(IMG).length ? '<button class="btn sec" id="quitarImg">Quitar</button>' : ''}</div></section>
   <section class="tarjeta"><h2>Copia de seguridad</h2>

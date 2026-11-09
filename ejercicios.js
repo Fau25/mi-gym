@@ -163,38 +163,38 @@ window.PLANTILLA = {
   empuje: {
     titulo: 'Empuje', sub: 'Pecho, hombro y tríceps',
     huecos: [
-      { fijo: 'banca', s: 4, r: [6, 10], alt: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'] },
-      { fijo: 'militar', s: 3, r: [8, 12], alt: ['arnold', 'militarBarraSent', 'trasNuca', 'militarPie', 'hombroMaq', 'hombroDiscos', 'hombroSmith', 'militarBarraPie'] },
-      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'], s: 3, r: [8, 12] },
-      { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo', 'crucesMedio', 'crucesAlto'], s: 3, r: [12, 15] },
-      { pool: ['latMan', 'latPolea', 'latMaq', 'latSent', 'frontMan', 'frontPolea', 'frontDisco', 'mentonSmith', 'latUna'], s: 4, r: [12, 20] },
-      { pool: ['cuerda', 'barraV', 'frances', 'cerrado', 'fondosAsist', 'fondosMaq', 'cerradoSmith', 'fondosBanco', 'extMaq', 'pushUna', 'pushRecta', 'pushInv'], s: 3, r: [10, 12] },
-      { pool: ['sobreCabPolea', 'sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna', 'francesSent', 'unaPoleaAlta', 'francesInc', 'patadaPolea', 'incPoleaAlta', 'francesDecl'], s: 3, r: [12, 15] }
+      { fijo: 'banca', s: 3, r: [8, 8], alt: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'] },
+      { fijo: 'militar', s: 3, r: [8, 8], alt: ['arnold', 'militarBarraSent', 'trasNuca', 'militarPie', 'hombroMaq', 'hombroDiscos', 'hombroSmith', 'militarBarraPie'] },
+      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'], s: 3, r: [8, 8] },
+      { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo', 'crucesMedio', 'crucesAlto'], s: 3, r: [8, 8] },
+      { pool: ['latMan', 'latPolea', 'latMaq', 'latSent', 'frontMan', 'frontPolea', 'frontDisco', 'mentonSmith', 'latUna'], s: 3, r: [8, 8] },
+      { pool: ['cuerda', 'barraV', 'frances', 'cerrado', 'fondosAsist', 'fondosMaq', 'cerradoSmith', 'fondosBanco', 'extMaq', 'pushUna', 'pushRecta', 'pushInv'], s: 3, r: [8, 8] },
+      { pool: ['sobreCabPolea', 'sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna', 'francesSent', 'unaPoleaAlta', 'francesInc', 'patadaPolea', 'incPoleaAlta', 'francesDecl'], s: 3, r: [8, 8] }
     ]
   },
   tiron: {
     titulo: 'Tirón', sub: 'Espalda y bíceps',
     huecos: [
-      { fijo: 'jalon', s: 4, r: [6, 10], alt: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'] },
-      { fijo: 'remoBarra', s: 4, r: [6, 10], alt: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'] },
-      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'], s: 3, r: [8, 12] },
-      { pool: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'], s: 3, r: [10, 12] },
-      { pool: ['pajaros', 'facePull', 'pajarosTumb', 'pajarosSent', 'pajaroPoleaUna', 'facePullSent', 'cruceInverso', 'pajarosMaq', 'encogBarra', 'encogMan', 'encogSmith'], s: 3, r: [12, 20] },
-      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea', 'predMaq', 'predMan', 'curlArrastre', 'curlInverso', 'curlMaq', 'curlArana'], s: 3, r: [8, 12] },
-      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr', 'curlSent', 'curlPoleaUna', 'martilloAlt', 'martilloCruz'], s: 3, r: [10, 15] }
+      { fijo: 'jalon', s: 3, r: [8, 8], alt: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'] },
+      { fijo: 'remoBarra', s: 3, r: [8, 8], alt: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'] },
+      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'], s: 3, r: [8, 8] },
+      { pool: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'], s: 3, r: [8, 8] },
+      { pool: ['pajaros', 'facePull', 'pajarosTumb', 'pajarosSent', 'pajaroPoleaUna', 'facePullSent', 'cruceInverso', 'pajarosMaq', 'encogBarra', 'encogMan', 'encogSmith'], s: 3, r: [8, 8] },
+      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea', 'predMaq', 'predMan', 'curlArrastre', 'curlInverso', 'curlMaq', 'curlArana'], s: 3, r: [8, 8] },
+      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr', 'curlSent', 'curlPoleaUna', 'martilloAlt', 'martilloCruz'], s: 3, r: [8, 8] }
     ]
   },
   pierna: {
     titulo: 'Pierna', sub: 'Pierna y abdomen',
     huecos: [
-      { fijo: 'sentadilla', s: 4, r: [6, 10], alt: ['sentSmith', 'hack', 'prensa'] },
-      { pool: ['prensa', 'sentSmith', 'sentMan', 'zancadas', 'hack'], s: 3, r: [8, 12] },
-      { fijo: 'rumano', s: 3, r: [6, 10], alt: ['pesoMuerto', 'sumo', 'hiperext'] },
-      { fijo: 'extCuad', s: 3, r: [10, 15] },
-      { pool: ['curlFemTumb', 'curlFemSent'], s: 3, r: [10, 15] },
-      { pool: ['hipThrust', 'sumo', 'hiperext'], s: 3, r: [8, 12] },
-      { pool: ['gemeloPie', 'gemeloSent', 'gemeloBarra'], s: 4, r: [12, 20] },
-      { pool: ['crunch', 'crunchPolea', 'abdV', 'crunchSent', 'elevRodillas'], s: 3, r: [12, 20] }
+      { fijo: 'sentadilla', s: 3, r: [8, 8], alt: ['sentSmith', 'hack', 'prensa'] },
+      { pool: ['prensa', 'sentSmith', 'sentMan', 'zancadas', 'hack'], s: 3, r: [8, 8] },
+      { fijo: 'rumano', s: 3, r: [8, 8], alt: ['pesoMuerto', 'sumo', 'hiperext'] },
+      { fijo: 'extCuad', s: 3, r: [8, 8] },
+      { pool: ['curlFemTumb', 'curlFemSent'], s: 3, r: [8, 8] },
+      { pool: ['hipThrust', 'sumo', 'hiperext'], s: 3, r: [8, 8] },
+      { pool: ['gemeloPie', 'gemeloSent', 'gemeloBarra'], s: 3, r: [8, 8] },
+      { pool: ['crunch', 'crunchPolea', 'abdV', 'crunchSent', 'elevRodillas'], s: 3, r: [8, 8] }
     ]
   }
 };
