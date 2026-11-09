@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -65,7 +65,7 @@ function plan(sem) {
 }
 function cambiar(sem, t, i) {
   const h = PLANTILLA[t].huecos[i], prev = planAnterior(sem), act = D.planes[sem][t][i];
-  const todos = h.pool || [h.fijo, ...(h.alt || [])];
+  const todos = h.pool ? [...h.pool, ...(h.extra || [])] : [h.fijo, ...(h.alt || [])];
   const hoyDia = D.planes[sem][t];
   const op = todos.filter(x => x !== act && !hoyDia.includes(x) && (!prev || !prev[t] || x !== prev[t][i]));
   const lista = op.length ? op : todos.filter(x => x !== act && !hoyDia.includes(x));

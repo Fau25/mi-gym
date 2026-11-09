@@ -108,7 +108,7 @@ window.EJ = {
   remoEstiramiento: { n: 'Remo en polea con estiramiento', g: 'espalda', inc: 5 },
   planchaInv: { n: 'Plancha inversa', g: 'abdomen', inc: 0 },
   curlCables: { n: 'Curl con cables a ambos lados', g: 'biceps', inc: 2.5 },
-  remoTRX: { n: 'Elevación frontal en polea alta', g: 'hombro', inc: 0 },
+  remoTRX: { n: 'Elevación frontal en polea alta', g: 'hombro', inc: 1.25 },
   jalonZancada: { n: 'Jalón a una mano en zancada', g: 'espalda', inc: 2.5 },
   contractora: { n: 'Contractora de pecho', g: 'pecho', inc: 5 },
   planoDiscos: { n: 'Press plano en máquina de discos', g: 'pecho', inc: 5 },
@@ -453,6 +453,13 @@ window.PLANTILLA = {
     ]
   }
 };
+
+// Los ejercicios sin peso no entran en la rotación del domingo (no permiten subir kilos);
+// quedan como alternativa manual con el botón de cambiar.
+for (const t in window.PLANTILLA) for (const h of window.PLANTILLA[t].huecos) if (h.pool) {
+  h.extra = h.pool.filter(id => !window.EJ[id].inc);
+  h.pool = h.pool.filter(id => window.EJ[id].inc);
+}
 
 // 0 = domingo … 6 = sábado
 window.DIAS = { 1: 'empuje', 4: 'empuje', 2: 'tiron', 5: 'tiron' };
