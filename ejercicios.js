@@ -15,6 +15,7 @@ window.EJ = {
   predMan: { n: 'Curl predicador con mancuerna', g: 'biceps', inc: 1 },
   curlSent: { n: 'Curl sentado con mancuernas', g: 'biceps', inc: 1 },
   remoApoyado: { n: 'Remo con pecho apoyado en banco inclinado', g: 'espalda', inc: 2 },
+  sobreCabPolea: { n: 'Extensión de tríceps sobre la cabeza en polea', g: 'triceps', inc: 2.5 },
   // Pecho
   banca:      { n: 'Press banca con barra', g: 'pecho', inc: 2.5 },
   incMan:     { n: 'Press inclinado con mancuernas', g: 'pecho', inc: 2 },
@@ -75,7 +76,7 @@ window.PLANTILLA = {
       { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo'], s: 3, r: [12, 15] },
       { pool: ['latMan', 'latPolea', 'latMaq', 'latSent'], s: 4, r: [12, 20] },
       { pool: ['cuerda', 'barraV', 'frances', 'cerrado'], s: 3, r: [10, 12] },
-      { pool: ['sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna'], s: 3, r: [12, 15] }
+      { pool: ['sobreCabPolea', 'sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna'], s: 3, r: [12, 15] }
     ]
   },
   tiron: {
