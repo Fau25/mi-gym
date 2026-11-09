@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v14';
+const VERSION = 'v15';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -260,11 +260,11 @@ function fichaA(x, tipo, i) {
   }
   return `<div class="a-asa" aria-hidden="true"></div>
     <div class="a-top"><button class="ic" data-cerrar aria-label="Cerrar">${SVG_X}</button><span>${i + 1} de ${x.total}</span>${x.puedeCambiar ? `<button class="ic" data-cambiar aria-label="Cambiar por otro ejercicio">${SVG_CAMBIO}</button>` : '<span class="ic"></span>'}</div>
-    <div class="a-img">${foto(x.id, 'big-img')}</div>
     <h2 id="hojaT">${esc(x.e.n)}</h2>
     <div class="pills peq">${x.etiqueta ? `<span class="on">${x.etiqueta}</span>` : ''}<span>${GRUPOS[x.e.g]}</span><span>${x.h.s} × ${rango(x.h.r)}</span></div>
-    <div class="a-consejo${x.sug.sube ? ' sube' : ''}"><b>Hoy</b><span>${esc(x.sug.txt)}</span>${x.ult ? `<small>Última vez (${corta(x.ult.f)}): ${x.ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(' · ')}</small>` : ''}</div>
-    <div class="series">${filas}</div>${pieHoja(x, tipo, i, 'oscuro')}`;
+    <div class="a-consejo${x.sug.sube ? ' sube' : ''}"><span>${esc(x.sug.txt)}</span>${x.ult ? `<small>Última vez (${corta(x.ult.f)}): ${x.ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(' · ')}</small>` : ''}</div>
+    <div class="series">${filas}</div>${pieHoja(x, tipo, i, 'oscuro')}
+    <div class="a-img">${foto(x.id, 'big-img')}</div>`;
 }
 function abrirHoja(tipo, i) {
   hojaAb = { tipo, i };

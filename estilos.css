@@ -263,3 +263,18 @@ body{padding:0 18px 150px}
 .f-a .series{gap:12px;margin-top:0}
 .f-a .serie{padding:8px 8px 8px 6px}
 .hoja-pie{margin-top:22px}
+/* ===== v15 · ficha sin scroll: información arriba, foto abajo ===== */
+#hoja .panel.p-a{height:calc(100% - 44px);display:flex;flex-direction:column;overflow:hidden}
+.f-a{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 18px 18px;overflow-y:auto}
+.f-a .a-asa{margin:2px auto 6px;flex:none}
+.f-a .a-top{flex:none}
+.f-a h2{font-size:20px;margin:6px 0 0;line-height:1.25}
+.f-a .pills.peq{margin:8px 0 12px;flex:none}
+.f-a .a-consejo{margin-bottom:12px;padding:11px 14px;gap:2px;flex:none}
+.f-a .a-consejo span{font-size:13.5px}
+.f-a .a-consejo small{margin-top:2px}
+.f-a .series{gap:8px;flex:none}
+.f-a .serie{padding:5px 6px 5px 4px}
+.f-a .hoja-pie{margin-top:12px;flex:none}
+.f-a .a-img{flex:1 1 auto;min-height:120px;margin:14px 0 0;display:flex}
+.f-a .a-img .big-img{width:100%;height:100%;max-height:none;aspect-ratio:auto}
