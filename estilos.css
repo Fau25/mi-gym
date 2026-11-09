@@ -1,12 +1,8 @@
-@font-face{font-family:Inter;src:url(fuentes/inter-400.woff2) format('woff2');font-weight:400;font-display:block}
-@font-face{font-family:Inter;src:url(fuentes/inter-500.woff2) format('woff2');font-weight:500;font-display:block}
-@font-face{font-family:Inter;src:url(fuentes/inter-600.woff2) format('woff2');font-weight:600;font-display:block}
-@font-face{font-family:Inter;src:url(fuentes/inter-700.woff2) format('woff2');font-weight:700;font-display:block}
 :root{--fondo:#F4F4F2;--tarj:#fff;--borde:#E6E5E1;--tinta:#18181B;--sec:#62626A;--pista:#ECECE9;--acento:#1F4B57;--acento-s:#E3EDEF;--bien:#2F6B48;--bien-s:#E2F0E6;--medio:#8A5A0B;--medio-s:#F8EDD7;--mal:#A3363B;--mal-s:#F8E3E3}
 @media (prefers-color-scheme:dark){:root{--fondo:#121214;--tarj:#1C1C1F;--borde:#2C2C30;--tinta:#F2F2F0;--sec:#A3A3AB;--pista:#2A2A2E;--acento:#7FB6C4;--acento-s:#1E3239;--bien:#7CC79A;--bien-s:#1D2E23;--medio:#E2B567;--medio-s:#33291A;--mal:#EE9196;--mal-s:#3A2022}}
 *{box-sizing:border-box;margin:0}
 html{-webkit-text-size-adjust:100%}
-body{font:400 15px/1.45 Inter,system-ui,sans-serif;background:var(--fondo);color:var(--tinta);padding:0 16px 110px;max-width:560px;margin:0 auto;-webkit-tap-highlight-color:transparent}
+body{font:400 15px/1.45 Montserrat,system-ui,sans-serif;background:var(--fondo);color:var(--tinta);padding:0 16px 110px;max-width:560px;margin:0 auto;-webkit-tap-highlight-color:transparent}
 main:focus{outline:none}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
@@ -29,10 +25,6 @@ h1 span{display:block;font-size:15px;font-weight:500;color:var(--sec);letter-spa
 .anim{position:relative;overflow:hidden;background:#fff;display:block}
 .anim img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain}
 .big-img img{inset:5% 8%;width:84%;height:90%}
-@media (prefers-color-scheme:dark){.anim{background:#1C1C1F}.anim img{filter:invert(1) brightness(.92)}}
-.anim img+img{animation:mov 2.4s infinite}
-@keyframes mov{0%,40%{opacity:0}50%,90%{opacity:1}100%{opacity:0}}
-@media (prefers-reduced-motion:reduce){.anim img+img{animation:none;opacity:0}}
 .ejtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .ejtxt b{font-size:14.5px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ejtxt small{font-size:12.5px;color:var(--sec)}
@@ -163,7 +155,7 @@ h2{font-size:16px;font-weight:600;letter-spacing:-.01em}
 @font-face{font-family:Montserrat;src:url(fuentes/montserrat-700.woff2) format('woff2');font-weight:700;font-display:block}
 :root{--fondo:#EFEFEF;--tarj:#fff;--borde:#E4E4E4;--tinta:#1F1F1F;--sec:#5F5F63;--pista:#E6E6E6;--acento:#232323;--acento-s:#EDEDED;--sombra:0 8px 24px rgba(0,0,0,.06)}
 @media (prefers-color-scheme:dark){:root{--fondo:#121212;--tarj:#1E1E1E;--borde:#2C2C2C;--tinta:#F2F2F2;--sec:#A6A6AB;--pista:#2C2C2C;--acento:#F2F2F2;--acento-s:#2A2A2A;--sombra:none}}
-body{font-family:Montserrat,Inter,system-ui,sans-serif}
+body{font-family:Montserrat,system-ui,sans-serif}
 .tarjeta,.ejfila,.pchip{border-color:transparent;box-shadow:var(--sombra)}
 .tarjeta{border-radius:22px}
 .btn{border-radius:16px;background:var(--acento);color:var(--fondo)}

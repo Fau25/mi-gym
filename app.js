@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -54,10 +54,9 @@ function plan(sem) {
   const prev = planAnterior(sem), r = azar(sem);
   for (const t in PLANTILLA) {
     const hs = PLANTILLA[t].huecos;
-    if (p[t] && p[t].length === hs.length && p[t].every(id => EJ[id])) continue;
+    if (p[t] && p[t].length === hs.length && p[t].every((id, i) => hs[i].pool.includes(id) || hs[i].extra.includes(id))) continue;
     const dia = [];
-    hs.forEach((h, i) => { if (h.fijo) dia[i] = h.fijo; });
-    hs.forEach((h, i) => { if (!h.fijo) dia[i] = elegir(h, [...(prev && prev[t] ? [prev[t][i]] : []), ...dia.filter(Boolean)], r); });
+    hs.forEach((h, i) => { dia[i] = elegir(h, [...(prev && prev[t] ? [prev[t][i]] : []), ...dia], r); });
     p[t] = dia; nuevo = true;
   }
   if (nuevo) { D.planes[sem] = p; guardar(); }
@@ -65,7 +64,7 @@ function plan(sem) {
 }
 function cambiar(sem, t, i) {
   const h = PLANTILLA[t].huecos[i], prev = planAnterior(sem), act = D.planes[sem][t][i];
-  const todos = h.pool ? [...h.pool, ...(h.extra || [])] : [h.fijo, ...(h.alt || [])];
+  const todos = [...h.pool, ...h.extra];
   const hoyDia = D.planes[sem][t];
   const op = todos.filter(x => x !== act && !hoyDia.includes(x) && (!prev || !prev[t] || x !== prev[t][i]));
   const lista = op.length ? op : todos.filter(x => x !== act && !hoyDia.includes(x));
@@ -168,16 +167,17 @@ async function imgGuardar(obj) {
 }
 (async () => {
   try {
-    const viejo = localStorage.getItem(CLAVE_IMG);
-    if (viejo) { await imgGuardar(JSON.parse(viejo)); localStorage.removeItem(CLAVE_IMG); }
-    IMG = await imgCargar();
+    localStorage.removeItem(CLAVE_IMG);
+    const todas = await imgCargar();
+    for (const id in todas) if (EJ[id]) IMG[id] = todas[id];
+    // Borra del dispositivo las imágenes de ejercicios que ya no están en el catálogo
+    if (Object.keys(todas).length > Object.keys(IMG).length) await imgGuardar(IMG);
     if (Object.keys(IMG).length) pintar();
   } catch (e) {}
 })();
 const imgValida = s => typeof s === 'string' && s.length < 600000 && /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s);
-const CON_DIBUJO = new Set(window.DIBUJOS || []);
 const ICONO = '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></svg>';
-const foto = (id, cls = 'mini-img') => !IMG[id] && !CON_DIBUJO.has(id) ? `<span class="${cls} anim ph" aria-hidden="true">${ICONO}<b>${GRUPOS[EJ[id].g]}</b></span>` : IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
+const foto = (id, cls = 'mini-img') => IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim ph" aria-hidden="true">${ICONO}<b>${GRUPOS[EJ[id].g]}</b></span>`;
 
 function vHoy() {
   const h = hoy(), d = deIso(h), sem = semanaDe(h), p = plan(sem);
@@ -206,7 +206,7 @@ function vHoy() {
     <div class="sec-t"><h2>Ejercicios de hoy</h2><span>${hechasHoy}/${total} series · ${pct} %</span></div>
     <ul class="ejs">${ids.map((id, i) => {
       const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
-      const nuevo = !hu.fijo && (!prev || !prev[tipo] || prev[tipo][i] !== id);
+      const nuevo = (!prev || !prev[tipo] || prev[tipo][i] !== id);
       const pc = Math.min(100, Math.round(s / hu.s * 100));
       return `<li><button class="ejfila${s >= hu.s ? ' hecho' : ''}" data-abrir="${tipo}:${i}">${foto(id)}
         <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${rango(hu.r)}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}</small>
@@ -220,8 +220,8 @@ function proximo(h) { for (let i = 1; i <= 7; i++) { const f = sumar(h, i), t = 
 function resumenPlan(sem, t) {
   const p = plan(sem), prev = planAnterior(sem);
   return `<section class="tarjeta"><h2>${PLANTILLA[t].titulo} · ${PLANTILLA[t].sub}</h2><ul class="rejilla">${p[t].map((id, i) => {
-    const h = PLANTILLA[t].huecos[i], nuevo = !h.fijo && (!prev || !prev[t] || prev[t][i] !== id);
-    return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${rango(h.r)}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
+    const h = PLANTILLA[t].huecos[i], nuevo = (!prev || !prev[t] || prev[t][i] !== id);
+    return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${rango(h.r)}${nuevo ? ' · nuevo' : ''}</small></li>`;
   }).join('')}</ul></section>`;
 }
 
@@ -234,7 +234,7 @@ function datosHoja(fecha, tipo, i) {
   const id = plan(semanaDe(fecha))[tipo][i], h = PLANTILLA[tipo].huecos[i], ses = D.ses[fecha];
   const e = EJ[id], sug = sugerencia(id, h, fecha), hist = historial(id, fecha);
   const ult = hist.length ? hist[hist.length - 1] : null, prev = planAnterior(semanaDe(fecha));
-  const etiqueta = h.fijo ? (id === h.fijo ? 'Fijo' : 'Alternativa') : (!prev || !prev[tipo] || prev[tipo][i] !== id) ? 'Nuevo' : '';
+  const etiqueta = (!prev || !prev[tipo] || prev[tipo][i] !== id) ? 'Nuevo' : '';
   const series = (ses && ses.ej[id]) || [];
   const n = Math.max(h.s, series.length), hechasN = hechas(series).length;
   return { id, h, e, sug, ult, etiqueta, series, n, hechasN, todas: hechasN >= h.s, total: PLANTILLA[tipo].huecos.length, puedeCambiar: !!(h.pool || h.alt) };
@@ -291,8 +291,8 @@ function vProgreso() {
   sesSem.forEach(f => Object.entries(D.ses[f].ej).forEach(([id, s]) => { if (EJ[id] && EJ[id].g in porGrupo) porGrupo[EJ[id].g] += hechas(s).length; }));
   const r = ritmo();
 
-  // Fuerza en los ejercicios fijos
-  const fijos = [...new Set(Object.values(PLANTILLA).flatMap(p => p.huecos.filter(x => x.fijo).map(x => x.fijo)))];
+  // Fuerza en los 5 ejercicios más repetidos
+  const fijos = Object.keys(EJ).map(id => [id, historial(id).length]).filter(x => x[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
   const fuerza = fijos.map(id => {
     const hi = historial(id); if (!hi.length) return null;
     const act = mejorRM(hi[hi.length - 1].s);
@@ -347,7 +347,7 @@ function vAjustes() {
   const cs = copias();
   return `<header class="cab"><h1>Ajustes</h1></header>
   <form class="tarjeta fila-peso" id="fObj"><label class="campo"><span>Peso objetivo (kg)</span><input id="inObj" inputmode="decimal" value="${D.ajustes.objetivo ?? ''}" placeholder="Opcional"></label><button class="btn">Guardar</button></form>
-  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). 3 ejercicios por grupo muscular. Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza (puedes cambiarlos por una alternativa si la máquina está ocupada).</p>
+  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). 3 ejercicios por grupo muscular. Cada domingo se eligen 3 ejercicios por grupo entre los tuyos, sin repetir los de la semana anterior (puedes cambiarlos si la máquina está ocupada).</p>
     <button class="btn sec ancho" id="renovar">Renovar ejercicios de esta semana</button></section>
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Todos los ejercicios son de 3 series de 8. Cuando completas las 3 series de 8, te propone subir kilos. Si dos sesiones seguidas no llegas a 8, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
@@ -355,7 +355,7 @@ function vAjustes() {
   <section class="tarjeta"><h2>Copia de seguridad</h2>
     <div class="botones2"><button class="btn sec" id="exportar">Exportar</button><label class="btn sec">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label></div>
     ${cs.length ? `<p class="nota">Copias automáticas:</p><ul class="lista">${cs.map((c, i) => `<li><span>${corta(c.f)}</span><small><button class="mini txt" data-restaurar="${i}">Restaurar</button></small></li>`).join('')}</ul>` : ''}</section>
-  <p class="nota centro">Mi Gym ${VERSION} · datos solo en este dispositivo<br>Ilustraciones: <a href="https://github.com/everkinetic/data">Everkinetic</a> (CC BY-SA 4.0)</p>`;
+  <p class="nota centro">Mi Gym ${VERSION} · datos solo en este dispositivo</p>`;
 }
 
 // ---------- Eventos ----------
@@ -404,11 +404,9 @@ document.addEventListener('click', e => {
   if (t.dataset.restaurar) { const c = copias()[+t.dataset.restaurar]; if (c) { const antes = D; D = Object.assign(vacio(), c.d); guardar(); pintar(); aviso('Copia restaurada', () => { D = antes; guardar(); pintar(); }); } }
 });
 function renovar(sem, viejo) {
-  // Elige ejercicios distintos de los actuales en cada hueco secundario
-  const p = {}; for (const t in PLANTILLA) { const elegidos = PLANTILLA[t].huecos.filter(h => h.fijo).map(h => h.fijo); p[t] = PLANTILLA[t].huecos.map((h, i) => {
-    if (h.fijo) return h.fijo;
-    const usados = D.ses[hoy()] && hechas(D.ses[hoy()].ej[viejo[t][i]]).length;
-    if (usados) return viejo[t][i];
+  // Elige ejercicios distintos de los actuales en cada hueco
+  const p = {}; for (const t in PLANTILLA) { const elegidos = viejo[t].filter(id => D.ses[hoy()] && hechas(D.ses[hoy()].ej[id]).length); p[t] = PLANTILLA[t].huecos.map((h, i) => {
+    if (elegidos.includes(viejo[t][i])) return viejo[t][i];
     const op = h.pool.filter(x => x !== viejo[t][i] && !elegidos.includes(x)); const x = op[Math.floor(Math.random() * op.length)] || viejo[t][i]; elegidos.push(x); return x;
   }); }
   D.planes[sem] = p;
