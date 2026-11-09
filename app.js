@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v10';
+const VERSION = 'v11';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -206,9 +206,8 @@ function resumenPlan(sem, t) {
   }).join('')}</ul></section>`;
 }
 
-// ---------- Hoja de un ejercicio (3 diseños: a = hoja, b = foco, c = tabla) ----------
+// ---------- Hoja de un ejercicio (diseño A en oscuro) ----------
 let hojaAb = null;
-let FICHA = (() => { try { const q = new URLSearchParams(location.search).get('ficha'); if (q) localStorage.setItem('migym-ficha', q); return localStorage.getItem('migym-ficha') || 'a'; } catch (e) { return 'a'; } })();
 const SVG_X = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 const SVG_CAMBIO = '<svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>';
 const SVG_OK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -229,7 +228,7 @@ const pieHoja = (x, tipo, i, cls = '') => `<div class="hoja-pie ${cls}"><button 
 
 function contenidoHoja(fecha, tipo, i) {
   const x = datosHoja(fecha, tipo, i);
-  return `<div class="ej f-${FICHA}" data-tipo="${tipo}" data-i="${i}">${({ a: fichaA, b: fichaB, c: fichaC })[FICHA] ? ({ a: fichaA, b: fichaB, c: fichaC })[FICHA](x, tipo, i) : fichaA(x, tipo, i)}</div>`;
+  return `<div class="ej f-a" data-tipo="${tipo}" data-i="${i}">${fichaA(x, tipo, i)}</div>`;
 }
 // A · Hoja: tarjeta que sube desde abajo, imagen en caja gris, consejo en banner negro, series en filas
 function fichaA(x, tipo, i) {
@@ -246,49 +245,12 @@ function fichaA(x, tipo, i) {
     <h2 id="hojaT">${esc(x.e.n)}</h2>
     <div class="pills peq">${x.etiqueta ? `<span class="on">${x.etiqueta}</span>` : ''}<span>${GRUPOS[x.e.g]}</span><span>${x.h.s} × ${rango(x.h.r)}</span></div>
     <div class="a-consejo${x.sug.sube ? ' sube' : ''}"><b>Hoy</b><span>${esc(x.sug.txt)}</span>${x.ult ? `<small>Última vez (${corta(x.ult.f)}): ${x.ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(' · ')}</small>` : ''}</div>
-    <div class="series">${filas}</div>${pieHoja(x, tipo, i)}`;
-}
-// B · Foco: pantalla completa oscura, una serie cada vez con botones grandes − / +
-function fichaB(x, tipo, i) {
-  const k = Math.min(x.series.findIndex(s => !s || !s.ok) < 0 ? x.n : x.series.findIndex(s => !s || !s.ok), x.n);
-  const actual = k < x.n ? k : x.n - 1, prevS = x.series.slice(0, actual).reverse().find(z => z && z.ok);
-  const s = Object.assign({}, prevS ? { kg: prevS.kg, reps: prevS.reps } : (x.sug.kg != null ? { kg: x.sug.kg, reps: x.sug.reps } : {}), x.series[actual] || {});
-  const fin = x.hechasN >= x.n;
-  return `<div class="b-top"><button class="ic" data-cerrar aria-label="Cerrar">${SVG_X}</button><span>${esc(PLANTILLA[tipo].titulo)} · ${i + 1}/${x.total}</span>${x.puedeCambiar ? `<button class="ic" data-cambiar aria-label="Cambiar por otro ejercicio">${SVG_CAMBIO}</button>` : '<span class="ic"></span>'}</div>
-    <div class="b-img">${foto(x.id, 'big-img')}</div>
-    <h2 id="hojaT">${esc(x.e.n)}</h2>
-    <p class="b-sug">${esc(x.sug.txt)}</p>
-    <div class="b-puntos">${Array.from({ length: x.n }, (_, j) => `<i class="${x.series[j] && x.series[j].ok ? 'si' : ''}${j === actual && !fin ? ' act' : ''}"></i>`).join('')}</div>
-    ${fin ? `<div class="b-fin">¡${x.n} series hechas!</div>` : `<div class="serie b-serie" data-id="${x.id}" data-k="${actual}">
-      <p class="b-lbl">Serie ${actual + 1} de ${x.n}</p>
-      <div class="b-paso"><button class="pm" data-paso="kg" data-d="-${x.e.inc || 1}" aria-label="Menos kilos">−</button><label>${inKg(x.id, actual, s, x.sug)}<i>kg</i></label><button class="pm" data-paso="kg" data-d="${x.e.inc || 1}" aria-label="Más kilos">+</button></div>
-      <div class="b-paso"><button class="pm" data-paso="reps" data-d="-1" aria-label="Menos repeticiones">−</button><label>${inReps(actual, s, x.sug)}<i>reps</i></label><button class="pm" data-paso="reps" data-d="1" aria-label="Más repeticiones">+</button></div>
-      <button class="check b-hecha" aria-pressed="false">Serie hecha</button></div>`}
-    <div class="b-hist">${x.series.map((s, j) => s && s.ok ? `<span>${j + 1} · ${fmt(s.kg, 2)}×${s.reps}<button class="check deshacer" data-k2="${j}" aria-label="Deshacer serie ${j + 1}">↺</button></span>` : '').join('')}</div>
-    ${pieHoja(x, tipo, i, 'oscuro')}`;
-}
-// C · Tabla: pantalla completa clara tipo cuaderno, columnas Serie / Anterior / Kg / Reps
-function fichaC(x, tipo, i) {
-  const pc = Math.round(x.hechasN / x.h.s * 100);
-  let filas = '';
-  for (let k = 0; k < x.n; k++) {
-    const s = x.series[k] || {}, a = x.ult && x.ult.s[k];
-    filas += `<div class="serie c-fila${s.ok ? ' ok' : ''}" data-id="${x.id}" data-k="${k}"><span class="ns">${k + 1}</span>
-      <span class="c-ant">${a ? `${fmt(a.kg, 2)}×${a.reps}` : '—'}</span>${inKg(x.id, k, s, x.sug)}${inReps(k, s, x.sug)}
-      <button class="check" aria-pressed="${!!s.ok}" aria-label="Serie ${k + 1} hecha">${SVG_OK}</button></div>`;
-  }
-  return `<div class="c-top"><button class="ic" data-cerrar aria-label="Cerrar">${SVG_X}</button><h2 id="hojaT">${esc(x.e.n)}</h2>${x.puedeCambiar ? `<button class="ic" data-cambiar aria-label="Cambiar por otro ejercicio">${SVG_CAMBIO}</button>` : '<span class="ic"></span>'}</div>
-    <div class="c-cab">${foto(x.id, 'c-img')}<div><div class="pills peq">${x.etiqueta ? `<span class="on">${x.etiqueta}</span>` : ''}<span>${GRUPOS[x.e.g]}</span></div>
-      <p class="c-sug">${esc(x.sug.txt)}</p>
-      <span class="barra-p"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect class="f" width="100" height="8" rx="4"/><rect class="v" width="${Math.min(100, pc)}" height="8" rx="4"/></svg><em>${pc}%</em></span></div></div>
-    <div class="c-tabla"><div class="c-th"><span>Serie</span><span>Anterior</span><span>Kg</span><span>Reps</span><span></span></div>${filas}</div>
-    ${pieHoja(x, tipo, i)}
-    <p class="c-paso">Ejercicio ${i + 1} de ${x.total} · ${esc(PLANTILLA[tipo].titulo)}</p>`;
+    <div class="series">${filas}</div>${pieHoja(x, tipo, i, 'oscuro')}`;
 }
 function abrirHoja(tipo, i) {
   hojaAb = { tipo, i };
   const hoja = $('#hoja'), panel = $('#hoja .panel');
-  panel.className = 'panel p-' + FICHA; panel.innerHTML = contenidoHoja(hoy(), tipo, i); panel.scrollTop = 0;
+  panel.className = 'panel p-a'; panel.innerHTML = contenidoHoja(hoy(), tipo, i); panel.scrollTop = 0;
   if (hoja.hidden) { hoja.hidden = false; $('#vista').inert = true; $('.menu').inert = true; requestAnimationFrame(() => hoja.classList.add('ver')); }
   panel.focus();
 }
@@ -371,7 +333,6 @@ function vAjustes() {
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Todos los ejercicios son de 3 series de 8. Cuando completas las 3 series de 8, te propone subir kilos. Si dos sesiones seguidas no llegas a 8, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
     <div class="botones2"><label class="btn sec">Importar imágenes<input type="file" id="importarImg" accept="application/json,.json" hidden></label>${Object.keys(IMG).length ? '<button class="btn sec" id="quitarImg">Quitar</button>' : ''}</div></section>
-  <section class="tarjeta"><h2>Diseño de la ficha del ejercicio</h2><div class="pills">${[['a', 'A · Hoja'], ['b', 'B · Foco'], ['c', 'C · Tabla']].map(([v, t]) => `<button data-ficha="${v}" class="${FICHA === v ? 'on' : ''}" aria-pressed="${FICHA === v}">${t}</button>`).join('')}</div></section>
   <section class="tarjeta"><h2>Copia de seguridad</h2>
     <div class="botones2"><button class="btn sec" id="exportar">Exportar</button><label class="btn sec">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label></div>
     ${cs.length ? `<p class="nota">Copias automáticas:</p><ul class="lista">${cs.map((c, i) => `<li><span>${corta(c.f)}</span><small><button class="mini txt" data-restaurar="${i}">Restaurar</button></small></li>`).join('')}</ul>` : ''}</section>
@@ -390,15 +351,6 @@ document.addEventListener('click', e => {
     tipoManual = t.dataset.entrenar || null;
     const s = D.ses[hoy()]; if (s && !Object.values(s.ej).some(x => hechas(x).length)) { delete D.ses[hoy()]; guardar(); }
     return pintar();
-  }
-  if (t.dataset.ficha) { FICHA = t.dataset.ficha; try { localStorage.setItem('migym-ficha', FICHA); } catch (e) {} pintar(); aviso('Diseño de ficha cambiado'); return; }
-  if (t.dataset.paso) {
-    const inp = t.closest('.serie').querySelector(`[data-c=${t.dataset.paso}]`);
-    const v = Math.max(0, +((num(inp.value) ?? num(inp.placeholder) ?? 0) + +t.dataset.d).toFixed(2));
-    inp.value = String(v).replace('.', ','); inp.dispatchEvent(new Event('change', { bubbles: true })); return;
-  }
-  if (t.dataset.k2 !== undefined) {
-    const id = plan(semanaDe(hoy()))[hojaAb.tipo][hojaAb.i]; D.ses[hoy()].ej[id][+t.dataset.k2].ok = false; guardar(); repintarHoja(); return;
   }
   if (t.dataset.abrir) { const [ti, i] = t.dataset.abrir.split(':'); return abrirHoja(ti, +i); }
   if (t.hasAttribute('data-cerrar')) return cerrarHoja();
