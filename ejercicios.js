@@ -16,6 +16,99 @@ window.EJ = {
   curlSent: { n: 'Curl sentado con mancuernas', g: 'biceps', inc: 1 },
   remoApoyado: { n: 'Remo con pecho apoyado en banco inclinado', g: 'espalda', inc: 2 },
   sobreCabPolea: { n: 'Extensión de tríceps sobre la cabeza en polea', g: 'triceps', inc: 2.5 },
+  // Ampliación 2 (todas las de la carpeta)
+  pressDecl: { n: 'Press declinado con barra', g: 'pecho', inc: 2.5 },
+  bancaAncho: { n: 'Press banca agarre ancho', g: 'pecho', inc: 2.5 },
+  bancaSmith: { n: 'Press banca en Smith', g: 'pecho', inc: 2.5 },
+  incSmith: { n: 'Press inclinado en Smith', g: 'pecho', inc: 2.5 },
+  incMaq: { n: 'Press inclinado en máquina', g: 'pecho', inc: 5 },
+  pressDiscos: { n: 'Press de pecho en máquina de discos', g: 'pecho', inc: 5 },
+  declMaq: { n: 'Press declinado en máquina', g: 'pecho', inc: 5 },
+  crucesMedio: { n: 'Cruces en polea a media altura', g: 'pecho', inc: 2.5 },
+  crucesAlto: { n: 'Cruces en polea alta', g: 'pecho', inc: 2.5 },
+  militarBarraSent: { n: 'Press militar sentado con barra', g: 'hombro', inc: 2.5 },
+  trasNuca: { n: 'Press tras nuca sentado', g: 'hombro', inc: 2.5 },
+  militarPie: { n: 'Press de hombro de pie con mancuernas', g: 'hombro', inc: 2 },
+  hombroMaq: { n: 'Press de hombro en máquina', g: 'hombro', inc: 5 },
+  hombroDiscos: { n: 'Press de hombro en máquina de discos', g: 'hombro', inc: 5 },
+  hombroSmith: { n: 'Press de hombro en Smith', g: 'hombro', inc: 2.5 },
+  militarBarraPie: { n: 'Press militar de pie con barra', g: 'hombro', inc: 2.5 },
+  frontMan: { n: 'Elevación frontal con mancuernas', g: 'hombro', inc: 1 },
+  frontPolea: { n: 'Elevación frontal en polea', g: 'hombro', inc: 1.25 },
+  frontDisco: { n: 'Elevación frontal con disco', g: 'hombro', inc: 2.5 },
+  mentonSmith: { n: 'Remo al mentón en Smith', g: 'hombro', inc: 2.5 },
+  latUna: { n: 'Elevación lateral a una mano', g: 'hombro', inc: 1 },
+  pajaroPoleaUna: { n: 'Pájaro a una mano en polea', g: 'hombro', inc: 1.25 },
+  facePullSent: { n: 'Face pull sentado', g: 'hombro', inc: 2.5 },
+  cruceInverso: { n: 'Cruce inverso en polea', g: 'hombro', inc: 1.25 },
+  pajarosMaq: { n: 'Pájaros en máquina', g: 'hombro', inc: 5 },
+  encogBarra: { n: 'Encogimientos con barra', g: 'hombro', inc: 2.5 },
+  encogMan: { n: 'Encogimientos con mancuernas', g: 'hombro', inc: 2 },
+  encogSmith: { n: 'Encogimientos en Smith', g: 'hombro', inc: 2.5 },
+  fondosAsist: { n: 'Fondos asistidos en máquina', g: 'triceps', inc: 5 },
+  fondosMaq: { n: 'Fondos en máquina', g: 'triceps', inc: 5 },
+  cerradoSmith: { n: 'Press cerrado en Smith', g: 'triceps', inc: 2.5 },
+  fondosBanco: { n: 'Fondos entre bancos', g: 'triceps', inc: 2.5 },
+  extMaq: { n: 'Extensión de tríceps en máquina', g: 'triceps', inc: 5 },
+  pushUna: { n: 'Extensión de tríceps a una mano en polea', g: 'triceps', inc: 1.25 },
+  pushRecta: { n: 'Extensión de tríceps en polea con barra recta', g: 'triceps', inc: 2.5 },
+  pushInv: { n: 'Extensión de tríceps agarre invertido', g: 'triceps', inc: 2.5 },
+  francesSent: { n: 'Press francés sentado con barra', g: 'triceps', inc: 2.5 },
+  unaPoleaAlta: { n: 'Extensión a una mano en polea alta', g: 'triceps', inc: 1.25 },
+  francesInc: { n: 'Extensión de tríceps con barra en banco inclinado', g: 'triceps', inc: 2.5 },
+  patadaPolea: { n: 'Patada de tríceps en polea', g: 'triceps', inc: 1.25 },
+  incPoleaAlta: { n: 'Extensión de tríceps inclinado en polea alta', g: 'triceps', inc: 2.5 },
+  francesDecl: { n: 'Press francés en banco declinado', g: 'triceps', inc: 2.5 },
+  pullBarra: { n: 'Pullover con barra', g: 'espalda', inc: 2.5 },
+  jalonUna: { n: 'Jalón a una mano', g: 'espalda', inc: 2.5 },
+  domAsist: { n: 'Dominadas asistidas', g: 'espalda', inc: 5 },
+  jalonMaq: { n: 'Jalón en máquina', g: 'espalda', inc: 5 },
+  jalonNuca: { n: 'Jalón tras nuca', g: 'espalda', inc: 5 },
+  jalonUnaPie: { n: 'Jalón a una mano de pie', g: 'espalda', inc: 2.5 },
+  domAncho: { n: 'Dominadas agarre ancho', g: 'espalda', inc: 2.5 },
+  jalonConv: { n: 'Jalón en máquina convergente', g: 'espalda', inc: 5 },
+  jalonDiscos: { n: 'Jalón en máquina de discos', g: 'espalda', inc: 5 },
+  domSup: { n: 'Dominadas supinas', g: 'espalda', inc: 2.5 },
+  remoBarraApoy: { n: 'Remo con barra apoyado', g: 'espalda', inc: 2.5 },
+  remoPoleaAncho: { n: 'Remo en polea baja agarre ancho', g: 'espalda', inc: 5 },
+  remoCuello: { n: 'Remo en polea al cuello', g: 'espalda', inc: 2.5 },
+  remoUnaInc: { n: 'Remo a una mano en banco inclinado', g: 'espalda', inc: 2 },
+  remoInvSmith: { n: 'Remo invertido en Smith', g: 'espalda', inc: 0 },
+  remoAltoMaq: { n: 'Remo alto en máquina', g: 'espalda', inc: 5 },
+  remoSentMaq: { n: 'Remo sentado en máquina', g: 'espalda', inc: 5 },
+  remoPecho: { n: 'Remo en máquina con apoyo de pecho', g: 'espalda', inc: 5 },
+  remoSmith: { n: 'Remo en Smith', g: 'espalda', inc: 2.5 },
+  remoIncBarra: { n: 'Remo con barra en banco inclinado', g: 'espalda', inc: 2.5 },
+  remoDiscos: { n: 'Remo en máquina de discos', g: 'espalda', inc: 5 },
+  curlArrastre: { n: 'Curl de arrastre con barra', g: 'biceps', inc: 2.5 },
+  curlInverso: { n: 'Curl inverso con barra', g: 'biceps', inc: 2.5 },
+  curlMaq: { n: 'Curl de bíceps en máquina', g: 'biceps', inc: 5 },
+  curlArana: { n: 'Curl araña', g: 'biceps', inc: 1 },
+  curlPoleaUna: { n: 'Curl a una mano en polea', g: 'biceps', inc: 1.25 },
+  martilloAlt: { n: 'Curl martillo alterno', g: 'biceps', inc: 1 },
+  martilloCruz: { n: 'Curl martillo cruzado', g: 'biceps', inc: 1 },
+  sentadilla: { n: 'Sentadilla con barra', g: 'pierna', inc: 2.5 },
+  sentSmith: { n: 'Sentadilla en Smith', g: 'pierna', inc: 2.5 },
+  sentMan: { n: 'Sentadilla con mancuernas', g: 'pierna', inc: 2 },
+  prensa: { n: 'Prensa de piernas', g: 'pierna', inc: 10 },
+  zancadas: { n: 'Zancadas con mancuernas', g: 'pierna', inc: 2 },
+  hack: { n: 'Sentadilla hack en máquina', g: 'pierna', inc: 5 },
+  extCuad: { n: 'Extensión de cuádriceps', g: 'pierna', inc: 5 },
+  rumano: { n: 'Peso muerto rumano con barra', g: 'pierna', inc: 2.5 },
+  pesoMuerto: { n: 'Peso muerto con barra', g: 'pierna', inc: 5 },
+  curlFemTumb: { n: 'Curl femoral tumbado', g: 'pierna', inc: 2.5 },
+  curlFemSent: { n: 'Curl femoral sentado', g: 'pierna', inc: 2.5 },
+  hiperext: { n: 'Hiperextensiones', g: 'pierna', inc: 2.5 },
+  hipThrust: { n: 'Hip thrust con barra', g: 'pierna', inc: 5 },
+  sumo: { n: 'Peso muerto sumo', g: 'pierna', inc: 5 },
+  gemeloPie: { n: 'Elevación de gemelos de pie en máquina', g: 'pierna', inc: 5 },
+  gemeloSent: { n: 'Elevación de gemelos sentado', g: 'pierna', inc: 5 },
+  gemeloBarra: { n: 'Elevación de gemelos con barra', g: 'pierna', inc: 5 },
+  crunch: { n: 'Crunch abdominal', g: 'abdomen', inc: 0 },
+  crunchPolea: { n: 'Crunch en polea', g: 'abdomen', inc: 2.5 },
+  abdV: { n: 'Abdominal en V', g: 'abdomen', inc: 0 },
+  crunchSent: { n: 'Encogimiento abdominal sentado', g: 'abdomen', inc: 0 },
+  elevRodillas: { n: 'Elevación de rodillas', g: 'abdomen', inc: 0 },
   // Pecho
   banca:      { n: 'Press banca con barra', g: 'pecho', inc: 2.5 },
   incMan:     { n: 'Press inclinado con mancuernas', g: 'pecho', inc: 2 },
@@ -62,7 +155,7 @@ window.EJ = {
   curlZ:      { n: 'Curl con barra Z', g: 'biceps', inc: 2.5 }
 };
 
-window.GRUPOS = { pecho: 'Pecho', hombro: 'Hombro', triceps: 'Tríceps', espalda: 'Espalda', biceps: 'Bíceps' };
+window.GRUPOS = { pecho: 'Pecho', hombro: 'Hombro', triceps: 'Tríceps', espalda: 'Espalda', biceps: 'Bíceps', pierna: 'Pierna', abdomen: 'Abdomen' };
 
 // Huecos de cada día. fijo = siempre el mismo (para medir la fuerza);
 // pool = se cambia cada domingo por otro distinto al de la semana anterior.
@@ -70,28 +163,44 @@ window.PLANTILLA = {
   empuje: {
     titulo: 'Empuje', sub: 'Pecho, hombro y tríceps',
     huecos: [
-      { fijo: 'banca', s: 4, r: [6, 10] },
-      { fijo: 'militar', s: 3, r: [8, 12] },
-      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro'], s: 3, r: [8, 12] },
-      { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo'], s: 3, r: [12, 15] },
-      { pool: ['latMan', 'latPolea', 'latMaq', 'latSent'], s: 4, r: [12, 20] },
-      { pool: ['cuerda', 'barraV', 'frances', 'cerrado'], s: 3, r: [10, 12] },
-      { pool: ['sobreCabPolea', 'sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna'], s: 3, r: [12, 15] }
+      { fijo: 'banca', s: 4, r: [6, 10], alt: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'] },
+      { fijo: 'militar', s: 3, r: [8, 12], alt: ['arnold', 'militarBarraSent', 'trasNuca', 'militarPie', 'hombroMaq', 'hombroDiscos', 'hombroSmith', 'militarBarraPie'] },
+      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro', 'pressDecl', 'bancaAncho', 'bancaSmith', 'incSmith', 'incMaq', 'pressDiscos', 'declMaq'], s: 3, r: [8, 12] },
+      { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo', 'crucesMedio', 'crucesAlto'], s: 3, r: [12, 15] },
+      { pool: ['latMan', 'latPolea', 'latMaq', 'latSent', 'frontMan', 'frontPolea', 'frontDisco', 'mentonSmith', 'latUna'], s: 4, r: [12, 20] },
+      { pool: ['cuerda', 'barraV', 'frances', 'cerrado', 'fondosAsist', 'fondosMaq', 'cerradoSmith', 'fondosBanco', 'extMaq', 'pushUna', 'pushRecta', 'pushInv'], s: 3, r: [10, 12] },
+      { pool: ['sobreCabPolea', 'sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna', 'francesSent', 'unaPoleaAlta', 'francesInc', 'patadaPolea', 'incPoleaAlta', 'francesDecl'], s: 3, r: [12, 15] }
     ]
   },
   tiron: {
     titulo: 'Tirón', sub: 'Espalda y bíceps',
     huecos: [
-      { fijo: 'jalon', s: 4, r: [6, 10] },
-      { fijo: 'remoBarra', s: 4, r: [6, 10] },
-      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado'], s: 3, r: [8, 12] },
-      { pool: ['jalonEst', 'pullover', 'dominadas'], s: 3, r: [10, 12] },
-      { pool: ['pajaros', 'facePull', 'pajarosTumb', 'pajarosSent'], s: 3, r: [12, 20] },
-      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea', 'predMaq', 'predMan'], s: 3, r: [8, 12] },
-      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr', 'curlSent'], s: 3, r: [10, 15] }
+      { fijo: 'jalon', s: 4, r: [6, 10], alt: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'] },
+      { fijo: 'remoBarra', s: 4, r: [6, 10], alt: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'] },
+      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado', 'remoBarraApoy', 'remoPoleaAncho', 'remoCuello', 'remoUnaInc', 'remoInvSmith', 'remoAltoMaq', 'remoSentMaq', 'remoPecho', 'remoSmith', 'remoIncBarra', 'remoDiscos'], s: 3, r: [8, 12] },
+      { pool: ['jalonEst', 'pullover', 'dominadas', 'pullBarra', 'jalonUna', 'domAsist', 'jalonMaq', 'jalonNuca', 'jalonUnaPie', 'domAncho', 'jalonConv', 'jalonDiscos', 'domSup'], s: 3, r: [10, 12] },
+      { pool: ['pajaros', 'facePull', 'pajarosTumb', 'pajarosSent', 'pajaroPoleaUna', 'facePullSent', 'cruceInverso', 'pajarosMaq', 'encogBarra', 'encogMan', 'encogSmith'], s: 3, r: [12, 20] },
+      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea', 'predMaq', 'predMan', 'curlArrastre', 'curlInverso', 'curlMaq', 'curlArana'], s: 3, r: [8, 12] },
+      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr', 'curlSent', 'curlPoleaUna', 'martilloAlt', 'martilloCruz'], s: 3, r: [10, 15] }
+    ]
+  },
+  pierna: {
+    titulo: 'Pierna', sub: 'Pierna y abdomen',
+    huecos: [
+      { fijo: 'sentadilla', s: 4, r: [6, 10], alt: ['sentSmith', 'hack', 'prensa'] },
+      { pool: ['prensa', 'sentSmith', 'sentMan', 'zancadas', 'hack'], s: 3, r: [8, 12] },
+      { fijo: 'rumano', s: 3, r: [6, 10], alt: ['pesoMuerto', 'sumo', 'hiperext'] },
+      { fijo: 'extCuad', s: 3, r: [10, 15] },
+      { pool: ['curlFemTumb', 'curlFemSent'], s: 3, r: [10, 15] },
+      { pool: ['hipThrust', 'sumo', 'hiperext'], s: 3, r: [8, 12] },
+      { pool: ['gemeloPie', 'gemeloSent', 'gemeloBarra'], s: 4, r: [12, 20] },
+      { pool: ['crunch', 'crunchPolea', 'abdV', 'crunchSent', 'elevRodillas'], s: 3, r: [12, 20] }
     ]
   }
 };
 
 // 0 = domingo … 6 = sábado
-window.DIAS = { 1: 'empuje', 4: 'empuje', 2: 'tiron', 5: 'tiron' };
+window.DIAS = { 1: 'empuje', 4: 'empuje', 2: 'tiron', 5: 'tiron', 3: 'pierna' };
+
+// Ejercicios con dibujo de línea en img/ (el resto muestra un icono)
+window.DIBUJOS = ['apertInc', 'apertMan', 'arnold', 'banca', 'bancaAncho', 'bancaMan', 'bancaSmith', 'barraV', 'cerrado', 'concentr', 'cruces', 'crucesAlto', 'crucesBajo', 'crucesMedio', 'crunch', 'crunchPolea', 'cuerda', 'curlAlt', 'curlArana', 'curlArrastre', 'curlBarra', 'curlFemSent', 'curlFemTumb', 'curlInc', 'curlMaq', 'curlPolea', 'curlPoleaUna', 'curlSent', 'curlZ', 'domSup', 'dominadas', 'elevRodillas', 'encogSmith', 'extCuad', 'extMaq', 'extTumb', 'facePull', 'fondos', 'fondosBanco', 'frances', 'francesDecl', 'francesInc', 'francesSent', 'frontMan', 'frontPolea', 'gemeloBarra', 'gemeloPie', 'gemeloSent', 'hack', 'hipThrust', 'incBarra', 'incMan', 'incNeutro', 'incSmith', 'jalon', 'jalonEst', 'latMan', 'latMaq', 'latPolea', 'latSent', 'martillo', 'martilloAlt', 'martilloCruz', 'mentonSmith', 'militar', 'pajaros', 'pajarosSent', 'pajarosTumb', 'patada', 'pecDeck', 'predMan', 'predMaq', 'predicador', 'prensa', 'pressDecl', 'pressMaq', 'pullBarra', 'pullover', 'pushInv', 'pushRecta', 'remoApoyado', 'remoBarra', 'remoInvSmith', 'remoMan', 'remoMaq', 'remoPolea', 'remoT', 'sentMan', 'sentSmith', 'sentadilla', 'sobreCab', 'sobreCabP', 'sobreCabPolea', 'sobreCabUna', 'zancadas'];

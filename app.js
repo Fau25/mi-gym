@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -49,16 +49,22 @@ function azar(semilla) { let h = 2166136261; for (const c of semilla) h = Math.i
 function planAnterior(sem) { const k = Object.keys(D.planes).filter(x => x < sem).sort().pop(); return k ? D.planes[k] : null; }
 function elegir(hueco, evitar, r) { const op = hueco.pool.filter(x => !evitar.includes(x)); const lista = op.length ? op : hueco.pool; return lista[Math.floor(r() * lista.length)]; }
 function plan(sem) {
-  if (D.planes[sem]) return D.planes[sem];
-  const prev = planAnterior(sem), r = azar(sem), p = {};
-  for (const t in PLANTILLA) p[t] = PLANTILLA[t].huecos.map((h, i) => h.fijo || elegir(h, prev ? [prev[t][i]] : [], r));
-  D.planes[sem] = p; guardar();
+  const p = D.planes[sem] || {};
+  let nuevo = !D.planes[sem];
+  const prev = planAnterior(sem), r = azar(sem);
+  for (const t in PLANTILLA) {
+    const hs = PLANTILLA[t].huecos;
+    if (p[t] && p[t].length === hs.length && p[t].every(id => EJ[id])) continue;
+    p[t] = hs.map((h, i) => h.fijo || elegir(h, prev && prev[t] ? [prev[t][i]] : [], r)); nuevo = true;
+  }
+  if (nuevo) { D.planes[sem] = p; guardar(); }
   return p;
 }
 function cambiar(sem, t, i) {
   const h = PLANTILLA[t].huecos[i], prev = planAnterior(sem), act = D.planes[sem][t][i];
-  const op = h.pool.filter(x => x !== act && (!prev || x !== prev[t][i]));
-  const lista = op.length ? op : h.pool.filter(x => x !== act);
+  const todos = h.pool || [h.fijo, ...(h.alt || [])];
+  const op = todos.filter(x => x !== act && (!prev || !prev[t] || x !== prev[t][i]));
+  const lista = op.length ? op : todos.filter(x => x !== act);
   D.planes[sem][t][i] = lista[(lista.indexOf(act) + 1 + Math.floor(Math.random() * lista.length)) % lista.length] || act;
   guardar();
 }
@@ -74,6 +80,10 @@ const redondea = (kg, inc) => Math.round(kg / inc) * inc;
 
 function sugerencia(id, h, fecha) {
   const hist = historial(id, fecha), e = EJ[id], [lo, hi] = h.r;
+  if (hist.length && !e.inc) {
+    const u = hist[hist.length - 1].s, m = Math.min(...u.map(s => s.reps));
+    return { kg: Math.max(...u.map(s => s.kg)), reps: m + 1, txt: m >= hi ? 'Ya dominas el rango: añade peso o haz más repeticiones.' : `Intenta ${m + 1} repeticiones en cada serie.` };
+  }
   if (!hist.length) return { kg: null, reps: hi, txt: `Primera vez: elige un peso con el que llegues a ${hi} reps dejando 1–2 en reserva.` };
   const ult = hist[hist.length - 1].s;
   const kg = Math.max(...ult.map(s => s.kg));
@@ -143,7 +153,9 @@ function chipPeso() {
 const CLAVE_IMG = 'migym-img';
 let IMG = {}; try { IMG = JSON.parse(localStorage.getItem(CLAVE_IMG)) || {}; } catch (e) { IMG = {}; }
 const imgValida = s => typeof s === 'string' && s.length < 400000 && /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s);
-const foto = (id, cls = 'mini-img') => IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
+const CON_DIBUJO = new Set(window.DIBUJOS || []);
+const ICONO = '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></svg>';
+const foto = (id, cls = 'mini-img') => !IMG[id] && !CON_DIBUJO.has(id) ? `<span class="${cls} anim ph" aria-hidden="true">${ICONO}<b>${GRUPOS[EJ[id].g]}</b></span>` : IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
 
 function vHoy() {
   const h = hoy(), d = deIso(h), sem = semanaDe(h), p = plan(sem);
@@ -164,7 +176,7 @@ function vHoy() {
     <div class="avance" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${hechasHoy}" aria-label="Series hechas"><svg viewBox="0 0 100 6" preserveAspectRatio="none"><rect class="f" width="100" height="6" rx="3"/><rect class="v" width="${Math.max(hechasHoy ? 3 : 0, hechasHoy / total * 100)}" height="6" rx="3"/></svg><span>${hechasHoy}/${total} series</span></div>
     <ul class="ejs">${ids.map((id, i) => {
       const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
-      const nuevo = !hu.fijo && (!prev || prev[tipo][i] !== id);
+      const nuevo = !hu.fijo && (!prev || !prev[tipo] || prev[tipo][i] !== id);
       return `<li><button class="ejfila${s >= hu.s ? ' hecho' : ''}" data-abrir="${tipo}:${i}">${foto(id)}
         <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${hu.r[0]}–${hu.r[1]}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}${sug.sube ? ' · <em class="up">sube</em>' : ''}</small>
         <span class="puntos">${Array.from({ length: Math.max(hu.s, s) }, (_, k) => `<i class="${k < s ? 'si' : ''}"></i>`).join('')}</span></span>
@@ -178,7 +190,7 @@ function proximo(h) { for (let i = 1; i <= 7; i++) { const f = sumar(h, i), t = 
 function resumenPlan(sem, t) {
   const p = plan(sem), prev = planAnterior(sem);
   return `<section class="tarjeta"><h2>${PLANTILLA[t].titulo} · ${PLANTILLA[t].sub}</h2><ul class="rejilla">${p[t].map((id, i) => {
-    const h = PLANTILLA[t].huecos[i], nuevo = !h.fijo && (!prev || prev[t][i] !== id);
+    const h = PLANTILLA[t].huecos[i], nuevo = !h.fijo && (!prev || !prev[t] || prev[t][i] !== id);
     return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${h.r[0]}–${h.r[1]}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
   }).join('')}</ul></section>`;
 }
@@ -190,7 +202,7 @@ function contenidoHoja(fecha, tipo, i) {
   const e = EJ[id], sug = sugerencia(id, h, fecha), hist = historial(id, fecha);
   const ult = hist.length ? hist[hist.length - 1] : null;
   const prev = planAnterior(semanaDe(fecha));
-  const etiqueta = h.fijo ? '<span class="tag">Fijo</span>' : (!prev || prev[tipo][i] !== id) ? '<span class="tag nuevo">Nuevo esta semana</span>' : '';
+  const etiqueta = h.fijo ? (id === h.fijo ? '<span class="tag">Fijo</span>' : '<span class="tag nuevo">Alternativa</span>') : (!prev || !prev[tipo] || prev[tipo][i] !== id) ? '<span class="tag nuevo">Nuevo esta semana</span>' : '';
   const series = (ses && ses.ej[id]) || [];
   const n = Math.max(h.s, series.length), todas = hechas(series).length >= h.s;
   const total = PLANTILLA[tipo].huecos.length;
@@ -206,7 +218,7 @@ function contenidoHoja(fecha, tipo, i) {
   return `<div class="ej" data-tipo="${tipo}" data-i="${i}">
     <div class="hoja-img">${foto(id, 'big-img')}
       <button class="redondo cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-      ${h.fijo ? '' : `<button class="redondo cambiar" data-cambiar aria-label="Cambiar por otro ejercicio"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></button>`}
+      ${!h.pool && !h.alt ? '' : `<button class="redondo cambiar" data-cambiar aria-label="Cambiar por otro ejercicio"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></button>`}
       <span class="pos">${i + 1}/${total}</span></div>
     <div class="hoja-cuerpo">
     <h2 id="hojaT">${esc(e.n)}</h2><p class="meta">${etiqueta}<span>${GRUPOS[e.g]} · ${h.s} × ${h.r[0]}–${h.r[1]}</span></p>
@@ -266,7 +278,7 @@ function vProgreso() {
 
   return `<header class="cab"><p class="fecha">Semana ${semanaNum(sem)}</p><h1>Progreso</h1></header>
   <section class="tarjeta"><h2>Esta semana</h2>
-    <div class="cifras"><div><b>${sesSem.length}<small>/4</small></b><span>entrenos</span></div>
+    <div class="cifras"><div><b>${sesSem.length}<small>/5</small></b><span>entrenos</span></div>
     <div><b>${r && r.d != null ? (r.d >= 0 ? '+' : '') + fmt(r.d, 2) : '–'}</b><span>kg/semana</span></div>
     <div><b>${Object.values(porGrupo).reduce((a, b) => a + b, 0)}</b><span>series</span></div></div>
     <div class="barras">${Object.entries(porGrupo).map(([g, n]) => `<div class="barra"><span>${GRUPOS[g]}</span><svg class="pista" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect class="f" width="100" height="8" rx="4"/><rect class="${n >= 10 ? 'v ok' : 'v'}" width="${Math.max(n ? 4 : 0, Math.min(100, n / 20 * 100))}" height="8" rx="4"/><rect class="m" x="49.5" width="1" height="8"/></svg><b>${n}</b></div>`).join('')}</div>
@@ -298,7 +310,7 @@ function vAjustes() {
   const cs = copias();
   return `<header class="cab"><h1>Ajustes</h1></header>
   <form class="tarjeta fila-peso" id="fObj"><label class="campo"><span>Peso objetivo (kg)</span><input id="inObj" inputmode="decimal" value="${D.ajustes.objetivo ?? ''}" placeholder="Opcional"></label><button class="btn">Guardar</button></form>
-  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza.</p>
+  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). Miércoles: pierna y abdomen. Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza (puedes cambiarlos por una alternativa si la máquina está ocupada).</p>
     <button class="btn sec ancho" id="renovar">Renovar ejercicios de esta semana</button></section>
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Cuando haces todas las series en lo alto del rango de repeticiones, te propone subir kilos. Si dos sesiones seguidas no llegas al mínimo, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
