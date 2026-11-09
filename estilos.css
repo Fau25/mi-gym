@@ -22,7 +22,7 @@ h1 span{display:block;font-size:15px;font-weight:500;color:var(--sec);letter-spa
 .pchip.bien span{color:var(--bien)}.pchip.medio span{color:var(--medio)}.pchip.mal span{color:var(--mal)}
 .avance{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--sec);font-weight:600;margin:0 2px 12px}
 .avance svg{flex:1;height:6px}.avance rect{stroke:none}.avance .f{fill:var(--pista)}.avance .v{fill:var(--acento)}
-.ejs{list-style:none;padding:0;display:grid;gap:8px}
+.ejs{list-style:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 .ejfila{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--tarj);border:1px solid var(--borde);border-radius:16px;padding:8px 10px 8px 8px}
 .ejfila.hecho{border-color:var(--acento);background:var(--acento-s)}
 .mini-img{flex:none;width:64px;height:64px;border-radius:12px;border:1px solid var(--borde)}
@@ -143,3 +143,4 @@ h2{font-size:16px;font-weight:600;letter-spacing:-.01em}
 #aviso button{color:var(--fondo);font-weight:700;min-height:32px}
 :focus-visible{outline:2px solid var(--acento);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.anim.propia{background:#fff}.anim.propia img{inset:4%;width:92%;height:92%;filter:none!important}

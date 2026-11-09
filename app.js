@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v3';
+const VERSION = 'v5';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -139,7 +139,11 @@ function chipPeso() {
   if (!r) return `<button class="pchip" data-ir="peso">Apuntar peso</button>`;
   return `<button class="pchip ${r.cls}" data-ir="peso" aria-label="Peso ${fmt(r.ult)} kg"><b>${fmt(r.ult)} kg</b>${r.d != null ? `<span>${r.d >= 0 ? '+' : ''}${fmt(r.d, 2)}/sem</span>` : ''}</button>`;
 }
-const foto = (id, cls = 'mini-img') => `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
+// Imágenes propias (solo en este dispositivo, importadas desde Ajustes)
+const CLAVE_IMG = 'migym-img';
+let IMG = {}; try { IMG = JSON.parse(localStorage.getItem(CLAVE_IMG)) || {}; } catch (e) { IMG = {}; }
+const imgValida = s => typeof s === 'string' && s.length < 400000 && /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s);
+const foto = (id, cls = 'mini-img') => IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
 
 function vHoy() {
   const h = hoy(), d = deIso(h), sem = semanaDe(h), p = plan(sem);
@@ -297,6 +301,8 @@ function vAjustes() {
   <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza.</p>
     <button class="btn sec ancho" id="renovar">Renovar ejercicios de esta semana</button></section>
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Cuando haces todas las series en lo alto del rango de repeticiones, te propone subir kilos. Si dos sesiones seguidas no llegas al mínimo, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
+  <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
+    <div class="botones2"><label class="btn sec">Importar imágenes<input type="file" id="importarImg" accept="application/json,.json" hidden></label>${Object.keys(IMG).length ? '<button class="btn sec" id="quitarImg">Quitar</button>' : ''}</div></section>
   <section class="tarjeta"><h2>Copia de seguridad</h2>
     <div class="botones2"><button class="btn sec" id="exportar">Exportar</button><label class="btn sec">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label></div>
     ${cs.length ? `<p class="nota">Copias automáticas:</p><ul class="lista">${cs.map((c, i) => `<li><span>${corta(c.f)}</span><small><button class="mini txt" data-restaurar="${i}">Restaurar</button></small></li>`).join('')}</ul>` : ''}</section>
@@ -345,6 +351,7 @@ document.addEventListener('click', e => {
   if (t.dataset.borrapeso) { const f = t.dataset.borrapeso, kg = D.peso[f]; delete D.peso[f]; guardar(); pintar(); aviso('Pesada borrada', () => { D.peso[f] = kg; guardar(); pintar(); }); return; }
   if (t.id === 'renovar') { const sem = semanaDe(hoy()); renovar(sem, JSON.parse(JSON.stringify(plan(sem)))); return; }
   if (t.id === 'exportar') return exportar();
+  if (t.id === 'quitarImg') { const antes = IMG; IMG = {}; try { localStorage.removeItem(CLAVE_IMG); } catch (e) {} pintar(); aviso('Imágenes quitadas', () => { IMG = antes; try { localStorage.setItem(CLAVE_IMG, JSON.stringify(IMG)); } catch (e) {} pintar(); }); return; }
   if (t.dataset.restaurar) { const c = copias()[+t.dataset.restaurar]; if (c) { const antes = D; D = Object.assign(vacio(), c.d); guardar(); pintar(); aviso('Copia restaurada', () => { D = antes; guardar(); pintar(); }); } }
 });
 function renovar(sem, viejo) {
@@ -368,6 +375,16 @@ document.addEventListener('change', e => {
     arr[k][t.dataset.c] = num(t.value); guardar(); return;
   }
   if (t.id === 'selEj') { progSel = t.value; pintar(); return; }
+  if (t.id === 'importarImg' && t.files[0]) {
+    t.files[0].text().then(txt => {
+      const d = JSON.parse(txt); if (!d || d.tipo !== 'migym-imagenes' || !d.img) throw 0;
+      const nuevo = {}; for (const [id, s] of Object.entries(d.img)) if (EJ[id] && imgValida(s)) nuevo[id] = s;
+      if (!Object.keys(nuevo).length) throw 0;
+      try { localStorage.setItem(CLAVE_IMG, JSON.stringify(nuevo)); } catch (e) { return aviso('No caben las imágenes en este dispositivo'); }
+      IMG = nuevo; pintar(); aviso(`Imágenes importadas: ${Object.keys(nuevo).length}`);
+    }).catch(() => aviso('El archivo no es un paquete de imágenes de Mi Gym'));
+    t.value = ''; return;
+  }
   if (t.id === 'importar' && t.files[0]) {
     t.files[0].text().then(txt => {
       const d = JSON.parse(txt); if (!d || d.v !== 1 || !d.ses) throw 0;

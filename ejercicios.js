@@ -1,6 +1,20 @@
 // Catálogo de ejercicios y plantilla de cada día.
 // g = grupo · inc = subida de kilos sugerida
 window.EJ = {
+  // Ampliación (más variedad al renovar cada domingo)
+  apertInc: { n: 'Aperturas en banco inclinado', g: 'pecho', inc: 2 },
+  crucesBajo: { n: 'Cruces en polea de abajo arriba', g: 'pecho', inc: 2.5 },
+  incNeutro: { n: 'Press inclinado agarre neutro', g: 'pecho', inc: 2 },
+  latSent: { n: 'Elevaciones laterales sentado', g: 'hombro', inc: 1 },
+  latPolea: { n: 'Elevaciones laterales en polea', g: 'hombro', inc: 1.25 },
+  extTumb: { n: 'Extensión de tríceps tumbado con mancuernas', g: 'triceps', inc: 2 },
+  sobreCabUna: { n: 'Extensión a una mano sobre la cabeza', g: 'triceps', inc: 1 },
+  pajarosTumb: { n: 'Pájaros tumbado en banco', g: 'hombro', inc: 1 },
+  pajarosSent: { n: 'Pájaros sentado', g: 'hombro', inc: 1 },
+  predMaq: { n: 'Curl predicador en máquina', g: 'biceps', inc: 2.5 },
+  predMan: { n: 'Curl predicador con mancuerna', g: 'biceps', inc: 1 },
+  curlSent: { n: 'Curl sentado con mancuernas', g: 'biceps', inc: 1 },
+  remoApoyado: { n: 'Remo con pecho apoyado en banco inclinado', g: 'espalda', inc: 2 },
   // Pecho
   banca:      { n: 'Press banca con barra', g: 'pecho', inc: 2.5 },
   incMan:     { n: 'Press inclinado con mancuernas', g: 'pecho', inc: 2 },
@@ -14,7 +28,6 @@ window.EJ = {
   // Hombro
   militar:    { n: 'Press militar con mancuernas', g: 'hombro', inc: 2 },
   latMan:     { n: 'Elevaciones laterales con mancuernas', g: 'hombro', inc: 1 },
-  latPolea:   { n: 'Remo al mentón en polea', g: 'hombro', inc: 2.5 },
   latMaq:     { n: 'Remo al mentón con mancuernas', g: 'hombro', inc: 1 },
   arnold:     { n: 'Press Arnold', g: 'hombro', inc: 2 },
   pajaros:    { n: 'Pájaros (deltoides posterior)', g: 'hombro', inc: 1 },
@@ -58,11 +71,11 @@ window.PLANTILLA = {
     huecos: [
       { fijo: 'banca', s: 4, r: [6, 10] },
       { fijo: 'militar', s: 3, r: [8, 12] },
-      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos'], s: 3, r: [8, 12] },
-      { pool: ['pecDeck', 'cruces', 'apertMan'], s: 3, r: [12, 15] },
-      { pool: ['latMan', 'latPolea', 'latMaq'], s: 4, r: [12, 20] },
+      { pool: ['incMan', 'incBarra', 'bancaMan', 'pressMaq', 'fondos', 'incNeutro'], s: 3, r: [8, 12] },
+      { pool: ['pecDeck', 'cruces', 'apertMan', 'apertInc', 'crucesBajo'], s: 3, r: [12, 15] },
+      { pool: ['latMan', 'latPolea', 'latMaq', 'latSent'], s: 4, r: [12, 20] },
       { pool: ['cuerda', 'barraV', 'frances', 'cerrado'], s: 3, r: [10, 12] },
-      { pool: ['sobreCab', 'sobreCabP', 'patada'], s: 3, r: [12, 15] }
+      { pool: ['sobreCab', 'sobreCabP', 'patada', 'extTumb', 'sobreCabUna'], s: 3, r: [12, 15] }
     ]
   },
   tiron: {
@@ -70,11 +83,11 @@ window.PLANTILLA = {
     huecos: [
       { fijo: 'jalon', s: 4, r: [6, 10] },
       { fijo: 'remoBarra', s: 4, r: [6, 10] },
-      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT'], s: 3, r: [8, 12] },
+      { pool: ['remoMan', 'remoPolea', 'remoMaq', 'remoT', 'remoApoyado'], s: 3, r: [8, 12] },
       { pool: ['jalonEst', 'pullover', 'dominadas'], s: 3, r: [10, 12] },
-      { pool: ['pajaros', 'facePull'], s: 3, r: [12, 20] },
-      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea'], s: 3, r: [8, 12] },
-      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr'], s: 3, r: [10, 15] }
+      { pool: ['pajaros', 'facePull', 'pajarosTumb', 'pajarosSent'], s: 3, r: [12, 20] },
+      { pool: ['curlBarra', 'curlZ', 'predicador', 'curlPolea', 'predMaq', 'predMan'], s: 3, r: [8, 12] },
+      { pool: ['curlAlt', 'martillo', 'curlInc', 'concentr', 'curlSent'], s: 3, r: [10, 15] }
     ]
   }
 };

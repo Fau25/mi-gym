@@ -1,5 +1,5 @@
-const CACHE = 'mi-gym-v3';
-const IDS = ['banca','incMan','incBarra','pressMaq','pecDeck','cruces','apertMan','fondos','bancaMan','militar','latMan','latPolea','latMaq','arnold','pajaros','facePull','cuerda','barraV','frances','sobreCab','sobreCabP','patada','cerrado','jalon','remoBarra','remoMan','remoPolea','jalonEst','pullover','remoMaq','remoT','dominadas','curlBarra','curlAlt','martillo','predicador','curlPolea','curlInc','concentr','curlZ'];
+const CACHE = 'mi-gym-v5';
+const IDS = ['apertInc',  'apertMan',  'arnold',  'banca',  'bancaMan',  'barraV',  'cerrado',  'concentr',  'cruces',  'crucesBajo',  'cuerda',  'curlAlt',  'curlBarra',  'curlInc',  'curlPolea',  'curlSent',  'curlZ',  'dominadas',  'extTumb',  'facePull',  'fondos',  'frances',  'incBarra',  'incMan',  'incNeutro',  'jalon',  'jalonEst',  'latMan',  'latMaq',  'latPolea',  'latSent',  'martillo',  'militar',  'pajaros',  'pajarosSent',  'pajarosTumb',  'patada',  'pecDeck',  'predMan',  'predMaq',  'predicador',  'pressMaq',  'pullover',  'remoApoyado',  'remoBarra',  'remoMan',  'remoMaq',  'remoPolea',  'remoT',  'sobreCab',  'sobreCabP',  'sobreCabUna'];
 const ARCHIVOS = [...IDS.flatMap(i => [`img/${i}-0.webp`, `img/${i}-1.webp`]), './', 'index.html', 'estilos.css', 'app.js', 'ejercicios.js', 'manifest.json', 'icono-180.png', 'icono-192.png', 'icono-512.png',
   'fuentes/inter-400.woff2', 'fuentes/inter-500.woff2', 'fuentes/inter-600.woff2', 'fuentes/inter-700.woff2'];
 self.addEventListener('install', e => {
