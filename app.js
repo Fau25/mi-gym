@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -134,51 +134,62 @@ function pintar() {
   $('#vista').innerHTML = ({ hoy: vHoy, progreso: vProgreso, peso: vPeso, ajustes: vAjustes })[vista]();
 }
 
-function tarjetaPeso() {
+function chipPeso() {
   const r = ritmo();
-  if (!r) return `<button class="tarjeta peso-mini" data-ir="peso"><div><b>Peso corporal</b><small>Toca para apuntar tu peso de hoy</small></div><span class="flecha">›</span></button>`;
-  return `<button class="tarjeta peso-mini" data-ir="peso"><div><b>${fmt(r.ult)} kg</b><small>media 7 días ${fmt(r.media)} kg${r.d != null ? ` · ${r.d >= 0 ? '+' : ''}${fmt(r.d, 2)} kg/sem` : ''}</small></div><span class="estado ${r.cls}">${r.cls === 'bien' ? 'Buen ritmo' : r.cls === 'mal' ? 'Bajando' : r.cls ? 'Revisa' : 'Calculando'}</span></button>`;
+  if (!r) return `<button class="pchip" data-ir="peso">Apuntar peso</button>`;
+  return `<button class="pchip ${r.cls}" data-ir="peso" aria-label="Peso ${fmt(r.ult)} kg"><b>${fmt(r.ult)} kg</b>${r.d != null ? `<span>${r.d >= 0 ? '+' : ''}${fmt(r.d, 2)}/sem</span>` : ''}</button>`;
 }
+const foto = (id, cls = 'mini-img') => `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
 
 function vHoy() {
   const h = hoy(), d = deIso(h), sem = semanaDe(h), p = plan(sem);
   const ses = D.ses[h];
   const tipo = (ses && ses.tipo) || tipoManual || DIAS[d.getDay()];
-  const nSem = semanaNum(sem);
-  let html = `<header class="cab"><p class="fecha">${DSEM[d.getDay()]} ${corta(h)}</p>`;
+  let html = `<header class="cab fila"><div><p class="fecha">${DSEM[d.getDay()]} ${corta(h)} · semana ${semanaNum(sem)}</p>`;
   if (!tipo) {
     const dom = d.getDay() === 0;
-    html += `<h1>Descanso</h1><p class="sub">${dom ? 'Nueva semana lista con ejercicios renovados.' : 'El músculo crece descansando. Come bien y duerme 7–9 h.'}</p></header>${tarjetaPeso()}
-      <div class="botones2"><button class="btn" data-entrenar="empuje">Entrenar empuje</button><button class="btn" data-entrenar="tiron">Entrenar tirón</button></div>`;
+    html += `<h1>Descanso</h1></div>${chipPeso()}</header>
+      <p class="sub">${dom ? 'Nueva semana lista con ejercicios renovados.' : `El músculo crece descansando. Próximo: ${proximo(h)}.`}</p>
+      <div class="botones2"><button class="btn sec" data-entrenar="empuje">Entrenar empuje</button><button class="btn sec" data-entrenar="tiron">Entrenar tirón</button></div>`;
     if (dom) html += ['empuje', 'tiron'].map(t => resumenPlan(sem, t)).join('');
-    else html += `<p class="nota">Próximo: ${proximo(h)}</p>`;
     return html;
   }
-  const pl = PLANTILLA[tipo], ids = p[tipo];
+  const pl = PLANTILLA[tipo], ids = p[tipo], prev = planAnterior(sem);
   const total = pl.huecos.reduce((a, x) => a + x.s, 0), hechasHoy = ses ? Object.values(ses.ej).reduce((a, s) => a + hechas(s).length, 0) : 0;
-  html += `<h1>${pl.titulo} <span>${pl.sub}</span></h1><p class="chip">Semana ${nSem} · ${hechasHoy}/${total} series</p></header>${tarjetaPeso()}`;
-  html += ids.map((id, i) => tarjetaEj(h, tipo, i, id, pl.huecos[i], ses)).join('');
+  html += `<h1>${pl.titulo} <span>${pl.sub}</span></h1></div>${chipPeso()}</header>
+    <div class="avance" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${hechasHoy}" aria-label="Series hechas"><svg viewBox="0 0 100 6" preserveAspectRatio="none"><rect class="f" width="100" height="6" rx="3"/><rect class="v" width="${Math.max(hechasHoy ? 3 : 0, hechasHoy / total * 100)}" height="6" rx="3"/></svg><span>${hechasHoy}/${total} series</span></div>
+    <ul class="ejs">${ids.map((id, i) => {
+      const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
+      const nuevo = !hu.fijo && (!prev || prev[tipo][i] !== id);
+      return `<li><button class="ejfila${s >= hu.s ? ' hecho' : ''}" data-abrir="${tipo}:${i}">${foto(id)}
+        <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${hu.r[0]}–${hu.r[1]}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}${sug.sube ? ' · <em class="up">sube</em>' : ''}</small>
+        <span class="puntos">${Array.from({ length: Math.max(hu.s, s) }, (_, k) => `<i class="${k < s ? 'si' : ''}"></i>`).join('')}</span></span>
+        <span class="flecha" aria-hidden="true">›</span></button></li>`;
+    }).join('')}</ul>`;
   if (!DIAS[d.getDay()] || tipoManual) html += `<button class="btn sec ancho" data-entrenar="">Volver a descanso</button>`;
   return html;
 }
 function semanaNum(lunes) { const d = deIso(lunes), j = new Date(d.getFullYear(), 0, 4); return 1 + Math.round(((d - j) / 864e5 - 3 + ((j.getDay() + 6) % 7)) / 7); }
-function proximo(h) { for (let i = 1; i <= 7; i++) { const f = sumar(h, i), t = DIAS[deIso(f).getDay()]; if (t) return `${DSEM[deIso(f).getDay()].toLowerCase()}, ${PLANTILLA[t].titulo.toLowerCase()} (${PLANTILLA[t].sub.toLowerCase()})`; } return ''; }
+function proximo(h) { for (let i = 1; i <= 7; i++) { const f = sumar(h, i), t = DIAS[deIso(f).getDay()]; if (t) return `${DSEM[deIso(f).getDay()].toLowerCase()}, ${PLANTILLA[t].titulo.toLowerCase()}`; } return ''; }
 function resumenPlan(sem, t) {
   const p = plan(sem), prev = planAnterior(sem);
-  return `<section class="tarjeta"><h2>${PLANTILLA[t].titulo} · ${PLANTILLA[t].sub}</h2><ul class="lista">${p[t].map((id, i) => {
+  return `<section class="tarjeta"><h2>${PLANTILLA[t].titulo} · ${PLANTILLA[t].sub}</h2><ul class="rejilla">${p[t].map((id, i) => {
     const h = PLANTILLA[t].huecos[i], nuevo = !h.fijo && (!prev || prev[t][i] !== id);
-    return `<li><span>${esc(EJ[id].n)}</span><small>${h.s} × ${h.r[0]}–${h.r[1]}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
+    return `<li>${foto(id, 'rej-img')}<b>${esc(EJ[id].n)}</b><small>${h.s} × ${h.r[0]}–${h.r[1]}${h.fijo ? ' · fijo' : nuevo ? ' · nuevo' : ''}</small></li>`;
   }).join('')}</ul></section>`;
 }
 
-function tarjetaEj(fecha, tipo, i, id, h, ses) {
+// ---------- Hoja de un ejercicio ----------
+let hojaAb = null;
+function contenidoHoja(fecha, tipo, i) {
+  const id = plan(semanaDe(fecha))[tipo][i], h = PLANTILLA[tipo].huecos[i], ses = D.ses[fecha];
   const e = EJ[id], sug = sugerencia(id, h, fecha), hist = historial(id, fecha);
   const ult = hist.length ? hist[hist.length - 1] : null;
   const prev = planAnterior(semanaDe(fecha));
   const etiqueta = h.fijo ? '<span class="tag">Fijo</span>' : (!prev || prev[tipo][i] !== id) ? '<span class="tag nuevo">Nuevo esta semana</span>' : '';
   const series = (ses && ses.ej[id]) || [];
-  const n = Math.max(h.s, series.length);
-  const todas = hechas(series).length >= h.s;
+  const n = Math.max(h.s, series.length), todas = hechas(series).length >= h.s;
+  const total = PLANTILLA[tipo].huecos.length;
   let filas = '';
   for (let k = 0; k < n; k++) {
     const s = series[k] || {};
@@ -188,13 +199,36 @@ function tarjetaEj(fecha, tipo, i, id, h, ses) {
       <label><input inputmode="numeric" enterkeyhint="done" data-c="reps" value="${s.reps ?? ''}" placeholder="${sug.reps}" aria-label="Repeticiones serie ${k + 1}"><i>reps</i></label>
       <button class="check" aria-pressed="${!!s.ok}" aria-label="Serie ${k + 1} hecha"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>`;
   }
-  return `<section class="tarjeta ej${todas ? ' completo' : ''}" data-tipo="${tipo}" data-i="${i}">
-    <div class="ej-cab"><div><h2>${esc(e.n)}</h2><p class="meta">${etiqueta}<span>${GRUPOS[e.g]} · ${h.s} × ${h.r[0]}–${h.r[1]}</span></p></div>
-      ${h.fijo ? '' : `<button class="mini" data-cambiar aria-label="Cambiar por otro ejercicio"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></button>`}</div>
-    ${ult ? `<p class="ultima">Última (${corta(ult.f)}): ${ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(', ')}</p>` : ''}
+  return `<div class="ej" data-tipo="${tipo}" data-i="${i}">
+    <div class="hoja-img">${foto(id, 'big-img')}
+      <button class="redondo cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      ${h.fijo ? '' : `<button class="redondo cambiar" data-cambiar aria-label="Cambiar por otro ejercicio"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></button>`}
+      <span class="pos">${i + 1}/${total}</span></div>
+    <div class="hoja-cuerpo">
+    <h2 id="hojaT">${esc(e.n)}</h2><p class="meta">${etiqueta}<span>${GRUPOS[e.g]} · ${h.s} × ${h.r[0]}–${h.r[1]}</span></p>
     <p class="sug${sug.sube ? ' sube' : ''}">${esc(sug.txt)}</p>
+    ${ult ? `<p class="ultima">Última (${corta(ult.f)}): ${ult.s.map(s => `${fmt(s.kg, 2)}×${s.reps}`).join(', ')}</p>` : ''}
     <div class="series">${filas}</div>
-    <button class="mas" data-mas="${id}">+ Añadir serie</button></section>`;
+    <div class="hoja-pie"><button class="mas" data-mas="${id}">+ Serie</button>
+      ${i < total - 1 ? `<button class="btn${todas ? '' : ' sec'}" data-abrir="${tipo}:${i + 1}">Siguiente ›</button>` : `<button class="btn${todas ? '' : ' sec'}" data-cerrar>Terminar</button>`}</div>
+    </div></div>`;
+}
+function abrirHoja(tipo, i) {
+  hojaAb = { tipo, i };
+  const hoja = $('#hoja'), panel = $('#hoja .panel');
+  panel.innerHTML = contenidoHoja(hoy(), tipo, i); panel.scrollTop = 0;
+  if (hoja.hidden) { hoja.hidden = false; $('#vista').inert = true; $('.menu').inert = true; requestAnimationFrame(() => hoja.classList.add('ver')); }
+  panel.focus();
+}
+function cerrarHoja() {
+  if (!hojaAb) return; hojaAb = null;
+  const hoja = $('#hoja'); hoja.classList.remove('ver'); $('#vista').inert = false; $('.menu').inert = false;
+  setTimeout(() => { if (!hojaAb) hoja.hidden = true; }, 220);
+  pintar();
+}
+function repintarHoja() {
+  const panel = $('#hoja .panel'), y = panel.scrollTop;
+  panel.innerHTML = contenidoHoja(hoy(), hojaAb.tipo, hojaAb.i); panel.scrollTop = y;
 }
 
 function vProgreso() {
@@ -274,7 +308,7 @@ function sesion(fecha, tipo) { if (!D.ses[fecha]) D.ses[fecha] = { tipo, ej: {} 
 function tipoHoy() { const h = hoy(); return (D.ses[h] && D.ses[h].tipo) || tipoManual || DIAS[deIso(h).getDay()]; }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('button, [data-ir]'); if (!t) return;
+  const t = e.target.closest('button, [data-ir], [data-cerrar]'); if (!t) return;
   if (t.closest('.menu')) return ir(t.dataset.v);
   if (t.dataset.ir) return ir(t.dataset.ir);
   if (t.dataset.entrenar !== undefined) {
@@ -282,6 +316,8 @@ document.addEventListener('click', e => {
     const s = D.ses[hoy()]; if (s && !Object.values(s.ej).some(x => hechas(x).length)) { delete D.ses[hoy()]; guardar(); }
     return pintar();
   }
+  if (t.dataset.abrir) { const [ti, i] = t.dataset.abrir.split(':'); return abrirHoja(ti, +i); }
+  if (t.hasAttribute('data-cerrar')) return cerrarHoja();
   const card = t.closest('.ej');
   if (t.classList.contains('check')) {
     const fila = t.closest('.serie'), id = fila.dataset.id, k = +fila.dataset.k;
@@ -322,13 +358,7 @@ function renovar(sem, viejo) {
   D.planes[sem] = p;
   guardar(); pintar(); aviso('Ejercicios de la semana renovados', () => { D.planes[sem] = viejo; guardar(); pintar(); });
 }
-function repintarTarjeta(card) {
-  const h = hoy(), ti = card.dataset.tipo, i = +card.dataset.i, sem = semanaDe(h);
-  const nuevo = document.createElement('div');
-  nuevo.innerHTML = tarjetaEj(h, ti, i, D.planes[sem][ti][i], PLANTILLA[ti].huecos[i], D.ses[h]);
-  card.replaceWith(nuevo.firstElementChild);
-  const chip = $('.chip'); if (chip) chip.outerHTML = vHoy().match(/<p class="chip">.*?<\/p>/)[0];
-}
+function repintarTarjeta() { repintarHoja(); }
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.dataset.c) {
@@ -358,6 +388,7 @@ document.addEventListener('submit', e => {
   }
 });
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && hojaAb) { e.preventDefault(); return cerrarHoja(); }
   if (e.key === 'Enter' && e.target.dataset && e.target.dataset.c === 'kg') { e.preventDefault(); e.target.closest('.serie').querySelector('[data-c=reps]').focus(); }
   else if (e.key === 'Enter' && e.target.dataset && e.target.dataset.c === 'reps') { e.preventDefault(); e.target.blur(); }
 });

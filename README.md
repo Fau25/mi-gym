@@ -9,3 +9,5 @@ App personal (PWA) para apuntar los entrenos y el peso corporal, y seguir el pro
 - Datos solo en el dispositivo (localStorage), 3 copias automáticas diarias, exportar e importar.
 
 Publicar: subir `VERSION` en app.js y `CACHE` en sw.js, push a main (Pages desde main / raíz).
+
+Imágenes de ejercicios: [Free Exercise DB](https://github.com/yuhonas/free-exercise-db) (dominio público, Unlicense).
