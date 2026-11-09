@@ -241,3 +241,25 @@ body{font-family:Montserrat,Inter,system-ui,sans-serif}
 .hoja-pie.oscuro .mas{color:#fff}.hoja-pie.oscuro .btn{background:#fff;color:#141414}.hoja-pie.oscuro .btn.sec{background:#262626;color:#fff;border:0}
 .serie.ok .check{background:var(--acento);border-color:var(--acento);color:var(--fondo)}
 .serie.ok input{background:var(--acento-s)}
+/* ===== v12 · más aire ===== */
+body{padding:0 18px 150px}
+.gran{margin:18px 2px 6px}
+.sub-gran{color:var(--sec);font-size:14px;margin:0 2px 20px}
+.pills{margin-bottom:24px;padding:2px 0 8px}
+.sec-t{margin:0 2px 14px}
+.ejs{gap:10px}
+.tarjeta{margin-bottom:16px}
+.menu{bottom:18px}
+#aviso{bottom:104px}
+/* ficha flotante con márgenes */
+#hoja .panel{left:12px;right:12px;bottom:14px;width:auto;max-width:536px;border-radius:30px;max-height:calc(100% - 44px)}
+@media (min-width:560px){#hoja .panel{left:0;right:0}}
+.f-a{padding:12px 22px 30px}
+.a-asa{margin:4px auto 10px}
+.a-img{margin:12px 0 18px}
+.f-a h2{margin-bottom:2px}
+.f-a .pills.peq{margin:10px 0 18px;padding:0}
+.a-consejo{margin-bottom:20px;padding:16px 18px}
+.f-a .series{gap:12px;margin-top:0}
+.f-a .serie{padding:8px 8px 8px 6px}
+.hoja-pie{margin-top:22px}

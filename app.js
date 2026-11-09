@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v11';
+const VERSION = 'v12';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -55,7 +55,10 @@ function plan(sem) {
   for (const t in PLANTILLA) {
     const hs = PLANTILLA[t].huecos;
     if (p[t] && p[t].length === hs.length && p[t].every(id => EJ[id])) continue;
-    p[t] = hs.map((h, i) => h.fijo || elegir(h, prev && prev[t] ? [prev[t][i]] : [], r)); nuevo = true;
+    const dia = [];
+    hs.forEach((h, i) => { if (h.fijo) dia[i] = h.fijo; });
+    hs.forEach((h, i) => { if (!h.fijo) dia[i] = elegir(h, [...(prev && prev[t] ? [prev[t][i]] : []), ...dia.filter(Boolean)], r); });
+    p[t] = dia; nuevo = true;
   }
   if (nuevo) { D.planes[sem] = p; guardar(); }
   return p;
@@ -63,8 +66,9 @@ function plan(sem) {
 function cambiar(sem, t, i) {
   const h = PLANTILLA[t].huecos[i], prev = planAnterior(sem), act = D.planes[sem][t][i];
   const todos = h.pool || [h.fijo, ...(h.alt || [])];
-  const op = todos.filter(x => x !== act && (!prev || !prev[t] || x !== prev[t][i]));
-  const lista = op.length ? op : todos.filter(x => x !== act);
+  const hoyDia = D.planes[sem][t];
+  const op = todos.filter(x => x !== act && !hoyDia.includes(x) && (!prev || !prev[t] || x !== prev[t][i]));
+  const lista = op.length ? op : todos.filter(x => x !== act && !hoyDia.includes(x));
   D.planes[sem][t][i] = lista[(lista.indexOf(act) + 1 + Math.floor(Math.random() * lista.length)) % lista.length] || act;
   guardar();
 }
@@ -152,8 +156,25 @@ function chipPeso() {
 }
 // Imágenes propias (solo en este dispositivo, importadas desde Ajustes)
 const CLAVE_IMG = 'migym-img';
-let IMG = {}; try { IMG = JSON.parse(localStorage.getItem(CLAVE_IMG)) || {}; } catch (e) { IMG = {}; }
-const imgValida = s => typeof s === 'string' && s.length < 400000 && /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s);
+let IMG = {};
+function idb() { return new Promise((ok, ko) => { const r = indexedDB.open('migym', 1); r.onupgradeneeded = () => r.result.createObjectStore('img'); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }); }
+async function imgCargar() {
+  const db = await idb();
+  return new Promise(ok => { const out = {}, c = db.transaction('img').objectStore('img').openCursor(); c.onsuccess = () => { const k = c.result; if (k) { out[k.key] = k.value; k.continue(); } else ok(out); }; c.onerror = () => ok(out); });
+}
+async function imgGuardar(obj) {
+  const db = await idb();
+  return new Promise((ok, ko) => { const t = db.transaction('img', 'readwrite'), s = t.objectStore('img'); s.clear(); for (const k in obj) s.put(obj[k], k); t.oncomplete = ok; t.onerror = () => ko(t.error); });
+}
+(async () => {
+  try {
+    const viejo = localStorage.getItem(CLAVE_IMG);
+    if (viejo) { await imgGuardar(JSON.parse(viejo)); localStorage.removeItem(CLAVE_IMG); }
+    IMG = await imgCargar();
+    if (Object.keys(IMG).length) pintar();
+  } catch (e) {}
+})();
+const imgValida = s => typeof s === 'string' && s.length < 600000 && /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(s);
 const CON_DIBUJO = new Set(window.DIBUJOS || []);
 const ICONO = '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></svg>';
 const foto = (id, cls = 'mini-img') => !IMG[id] && !CON_DIBUJO.has(id) ? `<span class="${cls} anim ph" aria-hidden="true">${ICONO}<b>${GRUPOS[EJ[id].g]}</b></span>` : IMG[id] ? `<span class="${cls} anim propia" aria-hidden="true"><img src="${IMG[id]}" alt="" decoding="async"></span>` : `<span class="${cls} anim" aria-hidden="true"><img src="img/${id}-0.webp" alt="" loading="lazy" decoding="async"><img src="img/${id}-1.webp" alt="" loading="lazy" decoding="async"></span>`;
@@ -171,7 +192,7 @@ function vHoy() {
   if (!tipo) {
     const dom = d.getDay() === 0;
     html += `<h1 class="gran">Hoy toca<br>descansar</h1>
-      <section class="banner"><div><b>${dom ? 'Nueva semana lista' : 'El músculo crece descansando'}</b><small>${dom ? 'Ejercicios renovados para que sigas progresando.' : `Próximo: ${proximo(h)}.`}</small></div></section>
+      <p class="sub-gran">${dom ? 'Nueva semana lista con ejercicios renovados.' : `El músculo crece descansando. Próximo: ${proximo(h)}.`}</p>
       <div class="sec-t"><h2>¿Entrenar igualmente?</h2></div>${chips}`;
     if (dom) html += Object.keys(PLANTILLA).map(t => resumenPlan(sem, t)).join('');
     return html;
@@ -179,12 +200,10 @@ function vHoy() {
   const pl = PLANTILLA[tipo], ids = p[tipo], prev = planAnterior(sem);
   const total = pl.huecos.reduce((a, x) => a + x.s, 0), hechasHoy = ses ? Object.values(ses.ej).reduce((a, s) => a + hechas(s).length, 0) : 0;
   const pct = Math.round(hechasHoy / total * 100);
-  const sig = ids.findIndex((id, i) => hechas(ses && ses.ej[id]).length < pl.huecos[i].s);
   html += `<h1 class="gran">Hoy toca<br>${pl.titulo.toLowerCase()}</h1>
-    <section class="banner"><div><b>${pl.sub}</b><small>Semana ${semanaNum(sem)} · ${hechasHoy}/${total} series</small>
-      ${sig >= 0 ? `<button class="bpill" data-abrir="${tipo}:${sig}"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>${hechasHoy ? 'Continuar' : 'Empezar'}</button>` : '<span class="bpill">¡Completado!</span>'}</div>
-      ${foto(ids[sig >= 0 ? sig : 0], 'ban-img')}</section>
-    <div class="sec-t"><h2>Ejercicios de hoy</h2><span>${pct} %</span></div>${chips}
+    <p class="sub-gran">${pl.sub} · semana ${semanaNum(sem)}</p>
+    ${chips}
+    <div class="sec-t"><h2>Ejercicios de hoy</h2><span>${hechasHoy}/${total} series · ${pct} %</span></div>
     <ul class="ejs">${ids.map((id, i) => {
       const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
       const nuevo = !hu.fijo && (!prev || !prev[tipo] || prev[tipo][i] !== id);
@@ -268,8 +287,8 @@ function repintarHoja() {
 function vProgreso() {
   const h = hoy(), sem = deIso(h).getDay() === 0 ? sumar(semanaDe(h), -7) : semanaDe(h), fin = sumar(sem, 6);
   const sesSem = Object.keys(D.ses).filter(f => f >= sem && f <= fin && Object.values(D.ses[f].ej).some(s => hechas(s).length));
-  const porGrupo = {}; Object.keys(GRUPOS).forEach(g => porGrupo[g] = 0);
-  sesSem.forEach(f => Object.entries(D.ses[f].ej).forEach(([id, s]) => { if (EJ[id]) porGrupo[EJ[id].g] += hechas(s).length; }));
+  const porGrupo = {}; ['pecho', 'hombro', 'triceps', 'espalda', 'biceps'].forEach(g => porGrupo[g] = 0);
+  sesSem.forEach(f => Object.entries(D.ses[f].ej).forEach(([id, s]) => { if (EJ[id] && EJ[id].g in porGrupo) porGrupo[EJ[id].g] += hechas(s).length; }));
   const r = ritmo();
 
   // Fuerza en los ejercicios fijos
@@ -296,7 +315,7 @@ function vProgreso() {
 
   return `<header class="cab"><p class="fecha">Semana ${semanaNum(sem)}</p><h1>Progreso</h1></header>
   <section class="tarjeta"><h2>Esta semana</h2>
-    <div class="cifras"><div><b>${sesSem.length}<small>/5</small></b><span>entrenos</span></div>
+    <div class="cifras"><div><b>${sesSem.length}<small>/4</small></b><span>entrenos</span></div>
     <div><b>${r && r.d != null ? (r.d >= 0 ? '+' : '') + fmt(r.d, 2) : '–'}</b><span>kg/semana</span></div>
     <div><b>${Object.values(porGrupo).reduce((a, b) => a + b, 0)}</b><span>series</span></div></div>
     <div class="barras">${Object.entries(porGrupo).map(([g, n]) => `<div class="barra"><span>${GRUPOS[g]}</span><svg class="pista" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect class="f" width="100" height="8" rx="4"/><rect class="${n >= 10 ? 'v ok' : 'v'}" width="${Math.max(n ? 4 : 0, Math.min(100, n / 20 * 100))}" height="8" rx="4"/><rect class="m" x="49.5" width="1" height="8"/></svg><b>${n}</b></div>`).join('')}</div>
@@ -328,7 +347,7 @@ function vAjustes() {
   const cs = copias();
   return `<header class="cab"><h1>Ajustes</h1></header>
   <form class="tarjeta fila-peso" id="fObj"><label class="campo"><span>Peso objetivo (kg)</span><input id="inObj" inputmode="decimal" value="${D.ajustes.objetivo ?? ''}" placeholder="Opcional"></label><button class="btn">Guardar</button></form>
-  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). Miércoles: pierna y abdomen. Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza (puedes cambiarlos por una alternativa si la máquina está ocupada).</p>
+  <section class="tarjeta"><h2>Rutina</h2><p class="nota">Lunes y jueves: empuje (pecho, hombro y tríceps). Martes y viernes: tirón (espalda y bíceps). 3 ejercicios por grupo muscular. Cada domingo se renuevan los ejercicios secundarios; los fijos se mantienen para medir tu fuerza (puedes cambiarlos por una alternativa si la máquina está ocupada).</p>
     <button class="btn sec ancho" id="renovar">Renovar ejercicios de esta semana</button></section>
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Todos los ejercicios son de 3 series de 8. Cuando completas las 3 series de 8, te propone subir kilos. Si dos sesiones seguidas no llegas a 8, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
@@ -381,17 +400,17 @@ document.addEventListener('click', e => {
   if (t.dataset.borrapeso) { const f = t.dataset.borrapeso, kg = D.peso[f]; delete D.peso[f]; guardar(); pintar(); aviso('Pesada borrada', () => { D.peso[f] = kg; guardar(); pintar(); }); return; }
   if (t.id === 'renovar') { const sem = semanaDe(hoy()); renovar(sem, JSON.parse(JSON.stringify(plan(sem)))); return; }
   if (t.id === 'exportar') return exportar();
-  if (t.id === 'quitarImg') { const antes = IMG; IMG = {}; try { localStorage.removeItem(CLAVE_IMG); } catch (e) {} pintar(); aviso('Imágenes quitadas', () => { IMG = antes; try { localStorage.setItem(CLAVE_IMG, JSON.stringify(IMG)); } catch (e) {} pintar(); }); return; }
+  if (t.id === 'quitarImg') { const antes = IMG; IMG = {}; imgGuardar({}).catch(() => {}); pintar(); aviso('Imágenes quitadas', () => { IMG = antes; imgGuardar(IMG).catch(() => {}); pintar(); }); return; }
   if (t.dataset.restaurar) { const c = copias()[+t.dataset.restaurar]; if (c) { const antes = D; D = Object.assign(vacio(), c.d); guardar(); pintar(); aviso('Copia restaurada', () => { D = antes; guardar(); pintar(); }); } }
 });
 function renovar(sem, viejo) {
   // Elige ejercicios distintos de los actuales en cada hueco secundario
-  const p = {}; for (const t in PLANTILLA) p[t] = PLANTILLA[t].huecos.map((h, i) => {
+  const p = {}; for (const t in PLANTILLA) { const elegidos = PLANTILLA[t].huecos.filter(h => h.fijo).map(h => h.fijo); p[t] = PLANTILLA[t].huecos.map((h, i) => {
     if (h.fijo) return h.fijo;
     const usados = D.ses[hoy()] && hechas(D.ses[hoy()].ej[viejo[t][i]]).length;
     if (usados) return viejo[t][i];
-    const op = h.pool.filter(x => x !== viejo[t][i]); return op[Math.floor(Math.random() * op.length)];
-  });
+    const op = h.pool.filter(x => x !== viejo[t][i] && !elegidos.includes(x)); const x = op[Math.floor(Math.random() * op.length)] || viejo[t][i]; elegidos.push(x); return x;
+  }); }
   D.planes[sem] = p;
   guardar(); pintar(); aviso('Ejercicios de la semana renovados', () => { D.planes[sem] = viejo; guardar(); pintar(); });
 }
@@ -410,8 +429,8 @@ document.addEventListener('change', e => {
       const d = JSON.parse(txt); if (!d || d.tipo !== 'migym-imagenes' || !d.img) throw 0;
       const nuevo = {}; for (const [id, s] of Object.entries(d.img)) if (EJ[id] && imgValida(s)) nuevo[id] = s;
       if (!Object.keys(nuevo).length) throw 0;
-      try { localStorage.setItem(CLAVE_IMG, JSON.stringify(nuevo)); } catch (e) { return aviso('No caben las imágenes en este dispositivo'); }
-      IMG = nuevo; pintar(); aviso(`Imágenes importadas: ${Object.keys(nuevo).length}`);
+      aviso('Importando imágenes…');
+      return imgGuardar(nuevo).then(() => { IMG = nuevo; pintar(); aviso(`Imágenes importadas: ${Object.keys(nuevo).length}`); }, () => aviso('No caben las imágenes en este dispositivo'));
     }).catch(() => aviso('El archivo no es un paquete de imágenes de Mi Gym'));
     t.value = ''; return;
   }
