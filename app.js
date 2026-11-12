@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v17';
+const VERSION = 'v18';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -178,6 +178,9 @@ const dia = s => deIso(s).getTime() / 864e5;
 const rango = r => r[0] === r[1] ? r[0] : `${r[0]}–${r[1]}`;
 // ---------- Vistas ----------
 let vista = 'hoy', tipoManual = null;
+// Escritorio (desde 1024 px): ejercicios agrupados por músculo en columnas y menú arriba
+const MQ_PC = matchMedia('(min-width:1024px)');
+MQ_PC.addEventListener('change', () => { if (!hojaAb) pintar(); });
 function ir(v) { vista = v; pintar(); $('#vista').focus({ preventScroll: true }); scrollTo(0, 0); }
 function pintar() {
   document.querySelectorAll('.menu button').forEach(b => b.setAttribute('aria-current', b.dataset.v === vista ? 'page' : 'false'));
@@ -240,14 +243,24 @@ function vHoy() {
     <p class="sub-gran">${pl.sub} · semana ${semanaNum(sem)}</p>
     ${chips}
     <div class="sec-t"><h2>Ejercicios de hoy</h2><span>${hechasHoy}/${total} series · ${pct} %</span></div>
-    <ul class="ejs">${ids.map((id, i) => {
+    ${MQ_PC.matches ? gruposPC(ids, i => fichaEj(i)) : `<ul class="ejs">${ids.map((id, i) => fichaEj(i)).join('')}</ul>`}`;
+  function fichaEj(i) { const id = ids[i]; {
       const hu = pl.huecos[i], s = hechas(ses && ses.ej[id]).length, sug = sugerencia(id, hu, h);
       const nuevo = (!prev || !prev[tipo] || prev[tipo][i] !== id);
       const pc = Math.min(100, Math.round(s / hu.s * 100));
       return `<li><button class="ejfila${s >= hu.s ? ' hecho' : ''}" data-abrir="${tipo}:${i}">${foto(id)}
         <span class="ejtxt"><b>${esc(EJ[id].n)}</b><small>${hu.s} × ${rango(hu.r)}${sug.kg != null ? ` · ${fmt(sug.kg, 2)} kg` : ''}${nuevo ? ' · <em>nuevo</em>' : ''}</small>
         <span class="barra-p"><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect class="f" width="100" height="8" rx="4"/><rect class="v" width="${pc}" height="8" rx="4"/></svg><em>${pc}%</em></span></span></button></li>`;
-    }).join('')}</ul>`;
+    } }
+  function gruposPC(ids, f) {
+    const NOMBRES = { pecho: 'Pecho', hombro: 'Hombro', triceps: 'Tríceps', espalda: 'Espalda', biceps: 'Bíceps' };
+    const orden = [], por = {};
+    ids.forEach((id, i) => { const g = EJ[id].g; if (!por[g]) { por[g] = []; orden.push(g); } por[g].push(i); });
+    return `<div class="grupos-pc">${orden.map(g => {
+      const hech = por[g].reduce((a, i) => a + hechas(ses && ses.ej[ids[i]]).length, 0), tot = por[g].reduce((a, i) => a + pl.huecos[i].s, 0);
+      return `<section><div class="sec-t"><h2>${NOMBRES[g] || g}</h2><span>${hech}/${tot} series</span></div><ul class="ejs">${por[g].map(f).join('')}</ul></section>`;
+    }).join('')}</div>`;
+  }
   if (tipoManual && tipoManual !== DIAS[d.getDay()] && !tieneHechas) html += `<button class="btn sec ancho" data-entrenar="">${DIAS[d.getDay()] ? 'Volver al entreno de hoy' : 'Volver a descanso'}</button>`;
   return html;
 }

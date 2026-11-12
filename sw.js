@@ -1,4 +1,4 @@
-const CACHE = 'mi-gym-v17';
+const CACHE = 'mi-gym-v18';
 const ARCHIVOS = ['./', 'index.html', 'estilos.css', 'app.js', 'sync.js', 'ejercicios.js', 'manifest.json', 'icono-180.png', 'icono-192.png', 'icono-512.png',
   'fuentes/montserrat-400.woff2', 'fuentes/montserrat-500.woff2', 'fuentes/montserrat-600.woff2', 'fuentes/montserrat-700.woff2'];
 self.addEventListener('install', e => {
