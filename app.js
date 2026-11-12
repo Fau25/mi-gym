@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = 'v16';
+const VERSION = 'v17';
 const CLAVE = 'migym-v1', COPIAS = 'migym-copias';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -39,8 +39,44 @@ function guardar() {
     const cs = copias(), h = hoy();
     if (!cs[0] || cs[0].f !== h) { cs.unshift({ f: h, d: D }); localStorage.setItem(COPIAS, JSON.stringify(cs.slice(0, 3))); }
     else { cs[0].d = D; localStorage.setItem(COPIAS, JSON.stringify(cs)); }
+    if (!aplicandoSync && typeof SYNC !== 'undefined') SYNC.avisarCambio();
   } catch (e) { aviso('No se pudo guardar: el almacenamiento está lleno'); }
 }
+// ---------- Sincronización con Google Drive (opcional, Ajustes) ----------
+let aplicandoSync = false, syncEst = { t: 'off' }, pintarPendiente = false;
+function aItems() {
+  const m = { aj: D.ajustes };
+  for (const k in D.planes) m['plan:' + k] = D.planes[k];
+  for (const k in D.ses) m['ses:' + k] = D.ses[k];
+  for (const k in D.peso) m['peso:' + k] = D.peso[k];
+  return m;
+}
+function deItems(m) {
+  const n = vacio();
+  for (const k in m) {
+    const i = k.indexOf(':'), tipo = i < 0 ? k : k.slice(0, i), id = k.slice(i + 1);
+    if (k === 'aj') n.ajustes = Object.assign({ objetivo: null }, m[k]);
+    else if (tipo === 'plan') n.planes[id] = m[k];
+    else if (tipo === 'ses') n.ses[id] = m[k];
+    else if (tipo === 'peso') n.peso[id] = m[k];
+  }
+  D = n; aplicandoSync = true; guardar(); aplicandoSync = false;
+  const escribiendo = document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  if (hojaAb || escribiendo) pintarPendiente = true; else pintar();
+}
+function textoSync() {
+  const e = syncEst;
+  if (e.t === 'ok') return 'Sincronizado a las ' + e.x.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  if (e.t === 'sync') return 'Sincronizando…';
+  if (e.t === 'error') return 'No se pudo sincronizar: ' + e.x;
+  return '';
+}
+const SYNC = crearSync({
+  app: 'migym', aItems, deItems,
+  esNuevo: () => !Object.keys(D.ses).length && !Object.keys(D.peso).length && D.ajustes.objetivo == null,
+  estado: (t, x) => { syncEst = { t, x }; const el = document.getElementById('syncTxt'); if (el) { el.textContent = textoSync(); el.className = 'nota' + (t === 'error' ? ' error' : ''); } }
+});
+document.addEventListener('focusout', () => { setTimeout(() => { if (pintarPendiente && !hojaAb && !(document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))) { pintarPendiente = false; pintar(); } }, 50); });
 function copias() { try { return JSON.parse(localStorage.getItem(COPIAS)) || []; } catch (e) { return []; } }
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
 
@@ -352,10 +388,17 @@ function vAjustes() {
   <section class="tarjeta"><h2>Cómo te guía</h2><p class="nota">Todos los ejercicios son de 3 series de 8. Cuando completas las 3 series de 8, te propone subir kilos. Si dos sesiones seguidas no llegas a 8, te propone bajar un 10 %. Para el peso corporal busca ganar entre un 0,25 % y un 0,5 % a la semana.</p></section>
   <section class="tarjeta"><h2>Imágenes de los ejercicios</h2><p class="nota">${Object.keys(IMG).length ? `Usando tus imágenes en ${Object.keys(IMG).length} ejercicios. Se guardan solo en este dispositivo.` : 'Puedes importar un paquete de imágenes propio. Se guarda solo en este dispositivo.'}</p>
     <div class="botones2"><label class="btn sec">Importar imágenes<input type="file" id="importarImg" accept="application/json,.json" hidden></label>${Object.keys(IMG).length ? '<button class="btn sec" id="quitarImg">Quitar</button>' : ''}</div></section>
+  ${SYNC.conectado ? `<section class="tarjeta"><h2>Sincronización</h2><p class="nota">Tus entrenos y pesos se guardan en tu Google Drive y se comparten entre tus dispositivos.</p><p id="syncTxt" class="nota${syncEst.t === 'error' ? ' error' : ''}">${esc(textoSync())}</p>
+    <div class="botones2"><button class="btn sec" id="syncYa">Sincronizar ahora</button><button class="btn sec" id="syncOff">Desconectar</button></div></section>`
+  : `<form class="tarjeta" id="fSync"><h2>Sincronización</h2><p class="nota">Conecta tu script de Google «Mi Gym» para tener los mismos datos en el iPhone, el iPad y el PC.</p>
+    <label class="campo"><span>Dirección del script (acaba en /exec)</span><input id="inSyncUrl" type="url" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec"></label>
+    <label class="campo"><span>Contraseña del script</span><input id="inSyncClave" type="password" autocomplete="off"></label>
+    <p id="syncTxt" class="nota${syncEst.t === 'error' ? ' error' : ''}">${esc(textoSync())}</p>
+    <button class="btn ancho" id="btnSync">Conectar</button></form>`}
   <section class="tarjeta"><h2>Copia de seguridad</h2>
     <div class="botones2"><button class="btn sec" id="exportar">Exportar</button><label class="btn sec">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label></div>
     ${cs.length ? `<p class="nota">Copias automáticas:</p><ul class="lista">${cs.map((c, i) => `<li><span>${corta(c.f)}</span><small><button class="mini txt" data-restaurar="${i}">Restaurar</button></small></li>`).join('')}</ul>` : ''}</section>
-  <p class="nota centro">Mi Gym ${VERSION} · datos solo en este dispositivo</p>`;
+  <p class="nota centro">Mi Gym ${VERSION} · ${SYNC.conectado ? 'sincronizado con Google Drive' : 'datos solo en este dispositivo'}</p>`;
 }
 
 // ---------- Eventos ----------
@@ -398,6 +441,8 @@ document.addEventListener('click', e => {
     cambiar(sem, ti, i); repintarTarjeta(card); aviso('Ejercicio cambiado para toda la semana'); return;
   }
   if (t.dataset.borrapeso) { const f = t.dataset.borrapeso, kg = D.peso[f]; delete D.peso[f]; guardar(); pintar(); aviso('Pesada borrada', () => { D.peso[f] = kg; guardar(); pintar(); }); return; }
+  if (t.id === 'syncYa') { SYNC.sincronizar(); return; }
+  if (t.id === 'syncOff') { if (confirm('¿Desconectar la sincronización? Los datos se quedan en este dispositivo y en Drive.')) { SYNC.desconectar(); pintar(); } return; }
   if (t.id === 'renovar') { const sem = semanaDe(hoy()); renovar(sem, JSON.parse(JSON.stringify(plan(sem)))); return; }
   if (t.id === 'exportar') return exportar();
   if (t.id === 'quitarImg') { const antes = IMG; IMG = {}; imgGuardar({}).catch(() => {}); pintar(); aviso('Imágenes quitadas', () => { IMG = antes; imgGuardar(IMG).catch(() => {}); pintar(); }); return; }
@@ -441,6 +486,14 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('submit', e => {
   e.preventDefault();
+  if (e.target.id === 'fSync') {
+    const b = $('#btnSync'), txt = $('#syncTxt');
+    b.disabled = true; b.textContent = 'Conectando…';
+    SYNC.conectar($('#inSyncUrl').value, $('#inSyncClave').value)
+      .then(() => { pintar(); aviso('Sincronización activada'); })
+      .catch(err => { b.disabled = false; b.textContent = 'Conectar'; txt.textContent = err.message; txt.className = 'nota error'; });
+    return;
+  }
   if (e.target.id === 'fPeso') {
     const v = num($('#inPeso').value); if (v == null || v < 30 || v > 250) return aviso('Escribe un peso entre 30 y 250 kg');
     D.peso[hoy()] = v; guardar(); pintar(); aviso('Peso guardado');
@@ -481,3 +534,4 @@ navigator.serviceWorker && navigator.serviceWorker.addEventListener('controllerc
   if (recargando || document.activeElement && document.activeElement.tagName === 'INPUT') return; recargando = true; location.reload();
 });
 pintar();
+SYNC.iniciar();

@@ -10,3 +10,7 @@ App personal (PWA) para apuntar los entrenos y el peso corporal, y seguir el pro
 - Imágenes: paquete privado que se importa en Ajustes y se guarda en IndexedDB. No está en el repositorio; sin paquete se muestra un icono del grupo.
 
 Publicar: subir `VERSION` en app.js y `CACHE` en sw.js, push a main (Pages desde main / raíz).
+
+## Sincronización (v17)
+Opcional, en Ajustes › Sincronización: con un script de Google propio (`sincronizacion/Code.gs`, sin contraseña en el repo) los entrenos, pesos, planes y ajustes se guardan en Drive («Mi Gym»: datos.json + copias diarias) y se comparten entre dispositivos. Las imágenes siguen siendo solo del dispositivo.
+Pruebas: `node sincronizacion/prueba.js` y `python3 pruebas.py` (incluye dos dispositivos con el Code.gs real y Drive simulado).

@@ -50,6 +50,36 @@ with sync_playwright() as p:
     print('errores:',errs); assert not errs
     b.close()
 srv.terminate(); print('TODO BIEN')
+# prueba de sincronización: dos dispositivos con el Code.gs real (Drive simulado)
+import os, urllib.request
+srv = subprocess.Popen(['python3','-m','http.server','8771'],cwd='/home/claude/mi-gym',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+gas = subprocess.Popen(['node','sincronizacion/servidor-falso.js','8790'],cwd='/home/claude/mi-gym'); time.sleep(1)
+def falso(route):
+    r = route.request
+    req = urllib.request.Request('http://localhost:8790/', data=(r.post_data or '').encode(), method=r.method)
+    route.fulfill(status=200, content_type='application/json', body=urllib.request.urlopen(req).read())
+URL = 'https://script.google.com/macros/s/PRUEBA_123/exec'
+with sync_playwright() as p:
+    b=p.chromium.launch(); errs=[]
+    def disp():
+        c=b.new_context(viewport={'width':390,'height':844}); c.route('https://script.google.com/**', falso)
+        pg=c.new_page(); pg.on('pageerror',lambda e:errs.append(str(e))); pg.goto('http://localhost:8771/'); return pg
+    A=disp(); A.click('.menu [data-v=peso]'); A.fill('#inPeso','71,5'); A.click('#fPeso .btn')
+    A.click('.menu [data-v=ajustes]'); A.fill('#inSyncUrl', URL.replace('/exec','/dev')); A.fill('#inSyncClave','secreta'); A.click('#btnSync'); A.wait_for_timeout(300)
+    assert '/exec' in A.inner_text('#syncTxt'), A.inner_text('#syncTxt')
+    A.fill('#inSyncUrl', URL); A.fill('#inSyncClave','mala'); A.click('#btnSync'); A.wait_for_timeout(800)
+    assert 'incorrecta' in A.inner_text('#syncTxt'), A.inner_text('#syncTxt')
+    A.fill('#inSyncClave','secreta'); A.click('#btnSync'); A.wait_for_timeout(1500)
+    assert 'Sincronizado' in A.inner_text('#syncTxt'), A.inner_text('#syncTxt')
+    B=disp(); B.click('.menu [data-v=ajustes]'); B.fill('#inSyncUrl', URL); B.fill('#inSyncClave','secreta'); B.click('#btnSync'); B.wait_for_timeout(1500)
+    assert B.evaluate("D.peso[hoy()]") == 71.5, B.evaluate("JSON.stringify(D.peso)")
+    B.click('.menu [data-v=peso]'); B.fill('#inPeso','72'); B.click('#fPeso .btn'); B.wait_for_timeout(3000)
+    A.evaluate("SYNC.sincronizar()"); A.wait_for_timeout(1500)
+    assert A.evaluate("D.peso[hoy()]") == 72, A.evaluate("JSON.stringify(D.peso)")
+    A.screenshot(path='/home/claude/pruebas-gym/sync.png', full_page=True)
+    assert not errs, errs; b.close()
+gas.terminate(); srv.terminate(); print('SYNC OK')
+if not os.path.exists('/mnt/user-data/outputs/mi-gym-imagenes.json'): sys.exit(0)
 # prueba de importación de imágenes
 srv = subprocess.Popen(['python3','-m','http.server','8771'],cwd='/home/claude/mi-gym',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(1)
 with sync_playwright() as p:

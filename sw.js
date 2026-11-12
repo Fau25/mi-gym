@@ -1,5 +1,5 @@
-const CACHE = 'mi-gym-v16';
-const ARCHIVOS = ['./', 'index.html', 'estilos.css', 'app.js', 'ejercicios.js', 'manifest.json', 'icono-180.png', 'icono-192.png', 'icono-512.png',
+const CACHE = 'mi-gym-v17';
+const ARCHIVOS = ['./', 'index.html', 'estilos.css', 'app.js', 'sync.js', 'ejercicios.js', 'manifest.json', 'icono-180.png', 'icono-192.png', 'icono-512.png',
   'fuentes/montserrat-400.woff2', 'fuentes/montserrat-500.woff2', 'fuentes/montserrat-600.woff2', 'fuentes/montserrat-700.woff2'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));

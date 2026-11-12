@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Mi Gym">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com">
 <title>Mi Gym</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icono-192.png">
@@ -30,6 +30,7 @@
 <div id="aviso" role="status" aria-live="polite"></div>
 <noscript>Mi Gym necesita JavaScript.</noscript>
 <script src="ejercicios.js"></script>
+<script src="sync.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

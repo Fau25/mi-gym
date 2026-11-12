@@ -270,3 +270,5 @@ body{padding:0 18px 150px}
 .f-a .hoja-pie{margin-top:12px;flex:none}
 .f-a .a-img{flex:1 1 auto;min-height:120px;margin:14px 0 0;display:flex}
 .f-a .a-img .big-img{width:100%;height:100%;max-height:none;aspect-ratio:auto}
+.nota.error{color:#B42318}
+#fSync .campo{display:block;margin-top:12px}#fSync .campo input{width:100%;box-sizing:border-box}#fSync .btn{margin-top:12px}
